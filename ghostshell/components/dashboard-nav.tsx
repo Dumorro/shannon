@@ -12,6 +12,7 @@ import {
   User,
   Key,
   ClipboardList,
+  CreditCard,
 } from "lucide-react";
 import { TwoFactorStatus } from "./two-factor-status";
 
@@ -29,6 +30,7 @@ const getMainNavigation = (orgId: string): Array<{ name: string; href: string; i
 
 const getSettingsNavigation = (orgId: string) => [
   { name: "Organization", href: `/org/${orgId}/settings`, icon: Settings },
+  { name: "Billing", href: `/org/${orgId}/billing`, icon: CreditCard },
   { name: "Account", href: "/settings/account", icon: User },
   { name: "Security", href: "/settings/security", icon: Key, show2FAStatus: true },
   { name: "Audit Log", href: `/org/${orgId}/audit`, icon: ClipboardList },
