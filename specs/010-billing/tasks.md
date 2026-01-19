@@ -121,7 +121,7 @@ Based on plan.md structure:
 
 ### Tests for User Story 5
 
-- [ ] T032 [P] [US5] Integration test for webhook handler in ghostshell/__tests__/integration/billing-webhook.spec.ts
+- [x] T032 [P] [US5] Integration test for webhook handler in ghostshell/__tests__/integration/billing-webhook.test.ts
 - [x] T033 [P] [US5] Unit test for webhook handlers in ghostshell/__tests__/unit/billing/webhook-handlers.test.ts
 
 ### Implementation for User Story 5
