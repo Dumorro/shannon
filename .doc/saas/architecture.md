@@ -1,7 +1,7 @@
 # Shannon SaaS Solution Architecture
 
-**Version**: 1.1.0
-**Date**: 2026-01-18
+**Version**: 1.2.0
+**Date**: 2026-01-19
 **Status**: Draft
 
 ## Executive Summary
@@ -594,13 +594,14 @@ graph TB
 graph TD
     E001["Epic 001<br/>Onboarding & Setup<br/>✅ COMPLETE"]
     E002["Epic 002<br/>Security Scans<br/>🔄 IN PROGRESS"]
-    E003["Epic 003<br/>Findings & Remediation<br/>🔄 IN PROGRESS"]
+    E003["Epic 003<br/>Findings & Remediation<br/>🔄 ALMOST COMPLETE"]
     E004["Epic 004<br/>Reporting & Compliance<br/>🔄 IN PROGRESS"]
-    E005["Epic 005<br/>Shannon Service<br/>📋 SPECIFIED"]
-    E006["Epic 006<br/>Container Isolation<br/>📋 SPECIFIED"]
+    E005["Epic 005<br/>Shannon Service<br/>✅ COMPLETE"]
+    E006["Epic 006<br/>Container Isolation<br/>🔄 IN PROGRESS"]
     E007["Epic 007<br/>Monorepo Restructure<br/>✅ COMPLETE"]
     E008["Epic 008<br/>Monorepo Testing<br/>✅ COMPLETE"]
-    E009["Epic 009<br/>Billing & Subscriptions<br/>⏳ PLANNED"]
+    E009["Epic 009<br/>Terraform Infrastructure<br/>✅ COMPLETE"]
+    E010["Epic 010<br/>Billing & Subscriptions<br/>⏳ PLANNED"]
 
     E001 --> E002
     E002 --> E003
@@ -609,17 +610,19 @@ graph TD
     E005 --> E006
     E001 --> E007
     E007 --> E008
-    E001 --> E009
+    E009 --> E006
+    E001 --> E010
 
     style E001 fill:#22c55e
     style E002 fill:#eab308
-    style E003 fill:#eab308
+    style E003 fill:#22c55e
     style E004 fill:#eab308
-    style E005 fill:#3b82f6
-    style E006 fill:#3b82f6
+    style E005 fill:#22c55e
+    style E006 fill:#eab308
     style E007 fill:#22c55e
     style E008 fill:#22c55e
-    style E009 fill:#6b7280
+    style E009 fill:#22c55e
+    style E010 fill:#6b7280
 ```
 
 ---
@@ -657,19 +660,22 @@ graph LR
 
 ## Implementation Status
 
-| Epic | Description | Status |
-|------|-------------|--------|
-| 001-onboarding-setup | Authentication, organization, team management | ✅ Complete |
-| 002-security-scans | Quick scan, authenticated testing, scheduling, CI/CD | 🔄 In Progress |
-| 003-findings-remediation | Finding detail, notes, filtering, bulk updates | 🔄 In Progress |
-| 004-reporting-compliance | Reports, compliance mapping, sharing, scheduling | 🔄 In Progress |
-| 005-shannon-service | Shannon REST API service layer | 📋 Specified |
-| 006-container-isolation | Per-scan container sandboxing | 📋 Specified |
-| 007-monorepo-restructure | Shannon/GhostShell separation, DB rename | ✅ Complete |
-| 008-monorepo-testing | Vitest testing infrastructure | ✅ Complete |
-| 009-billing | Stripe integration, subscriptions | ⏳ Planned |
+| Epic | Description | Status | Progress |
+|------|-------------|--------|----------|
+| 001-onboarding-setup | Authentication, organization, team management | ✅ Complete | - |
+| 002-security-scans | Quick scan, authenticated testing, scheduling, CI/CD | 🔄 In Progress | US1-US3 done, US4-US5 pending (104/180 tasks) |
+| 003-findings-remediation | Finding detail, notes, filtering, bulk updates | ✅ Almost Complete | 47/50 tasks (3 polish tasks remaining) |
+| 004-reporting-compliance | Reports, compliance mapping, sharing, scheduling | 🔄 In Progress | US1-US2 done, US3-US6 pending (49/119 tasks) |
+| 005-shannon-service | Shannon REST API service layer | ✅ Complete | 81/81 tasks (all user stories done) |
+| 006-container-isolation | Per-scan container sandboxing | 🔄 In Progress | US1 MVP done, US2-US6 pending (31/103 tasks) |
+| 007-monorepo-restructure | Shannon/GhostShell separation, DB rename | ✅ Complete | - |
+| 008-monorepo-testing | Vitest testing infrastructure | ✅ Complete | - |
+| 009-terraform-infrastructure | Terraform AWS infrastructure (multi-env) | ✅ Complete | Networking module + 3 environments |
+| 010-billing | Stripe integration, subscriptions | ⏳ Planned | Not started |
 
 **Legend:** ✅ Complete | 🔄 In Progress | 📋 Specified | ⏳ Planned
+
+**Last Updated:** 2026-01-19
 
 ---
 
@@ -707,6 +713,15 @@ ghostshell/               # Web application (Next.js + Prisma)
 ├── __tests__/            # GhostShell package tests
 └── package.json          # GhostShell package dependencies
 
+infrastructure/           # Terraform AWS infrastructure (Epic 009)
+├── bootstrap/            # State backend setup (S3 + DynamoDB)
+├── modules/              # Reusable Terraform modules
+│   └── networking/       # VPC, subnets, security groups
+└── environments/         # Environment-specific configurations
+    ├── dev/              # Development environment
+    ├── staging/          # Staging environment
+    └── prod/             # Production environment
+
 specs/                    # Feature specifications
 ├── 001-onboarding-setup/
 ├── 002-security-scans/
@@ -715,7 +730,8 @@ specs/                    # Feature specifications
 ├── 005-shannon-service/
 ├── 006-container-isolation/
 ├── 007-monorepo-restructure/
-└── 008-setup-monorepo-testing/
+├── 008-setup-monorepo-testing/
+└── 009-terraform-infrastructure/
 
 docker-compose.yml        # Orchestrates all services
 package.json              # Workspace root configuration
@@ -726,9 +742,13 @@ vitest.workspace.ts       # Shared test configuration
 
 ## Next Steps
 
-1. **Complete Epic 002** - Scheduled Scans (US4) and CI/CD Integration (US5)
-2. **Complete Epic 003** - Final polish tasks
-3. **Complete Epic 004** - Sharing, Scheduling, Dashboard, Templates
-4. **Plan Epic 005** - Run `/speckit.plan specs/005-shannon-service`
-5. **Plan Epic 006** - Run `/speckit.plan specs/006-container-isolation`
-6. **Create Epic 009** - Billing & Subscription management
+### Immediate Priorities
+1. **Complete Epic 003** - 3 polish tasks remaining (T044, T046, T050)
+2. **Complete Epic 002** - Scheduled Scans (US4: 32 tasks) and CI/CD Integration (US5: 33 tasks)
+3. **Complete Epic 004** - Export/Share (US3), Scheduled Reports (US4), Dashboard (US5), Templates (US6)
+
+### Ready for Implementation
+4. **Complete Epic 006** - Container isolation US2-US6 (resource limits, network isolation, lifecycle, storage, images)
+
+### Future Planning
+5. **Create Epic 010** - Billing & Subscription management (Stripe integration)
