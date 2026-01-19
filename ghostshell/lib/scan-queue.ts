@@ -5,21 +5,30 @@
  */
 
 import { db } from "@/lib/db";
-
-// Default concurrent scan limit per organization
-const DEFAULT_CONCURRENT_LIMIT = 3;
+import { getConcurrentScanLimit, checkConcurrentScanLimit as checkPlanLimit } from "@/lib/billing/plan-limits";
+import type { PlanType } from "@/lib/billing/types";
 
 /**
  * Check if an organization can start a new scan.
  *
  * @param orgId - Organization ID
- * @returns Whether a new scan can start, current count, and limit
+ * @returns Whether a new scan can start, current count, limit, and plan info
  */
 export async function checkConcurrentLimit(orgId: string): Promise<{
   canStart: boolean;
   currentCount: number;
   limit: number;
+  plan: PlanType;
 }> {
+  // Get organization plan
+  const org = await db.organization.findUnique({
+    where: { id: orgId },
+    select: { plan: true },
+  });
+
+  const plan = (org?.plan || "free") as PlanType;
+  const limit = getConcurrentScanLimit(plan);
+
   // Count currently active scans (PENDING or RUNNING)
   const currentCount = await db.scan.count({
     where: {
@@ -30,13 +39,13 @@ export async function checkConcurrentLimit(orgId: string): Promise<{
     },
   });
 
-  // TODO: Make limit configurable per organization (from org settings)
-  const limit = DEFAULT_CONCURRENT_LIMIT;
+  const result = checkPlanLimit(plan, currentCount);
 
   return {
-    canStart: currentCount < limit,
+    canStart: result.allowed,
     currentCount,
     limit,
+    plan,
   };
 }
 
@@ -89,7 +98,17 @@ export async function getQueueStats(orgId: string): Promise<{
   pending: number;
   limit: number;
   available: number;
+  plan: PlanType;
 }> {
+  // Get organization plan
+  const org = await db.organization.findUnique({
+    where: { id: orgId },
+    select: { plan: true },
+  });
+
+  const plan = (org?.plan || "free") as PlanType;
+  const limit = getConcurrentScanLimit(plan);
+
   const [running, pending] = await Promise.all([
     db.scan.count({
       where: {
@@ -105,7 +124,6 @@ export async function getQueueStats(orgId: string): Promise<{
     }),
   ]);
 
-  const limit = DEFAULT_CONCURRENT_LIMIT;
   const available = Math.max(0, limit - running);
 
   return {
@@ -113,5 +131,6 @@ export async function getQueueStats(orgId: string): Promise<{
     pending,
     limit,
     available,
+    plan,
   };
 }

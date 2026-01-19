@@ -5,6 +5,7 @@ import { getCurrentUser, getUserOrganizations } from "@/lib/auth";
 import { OrgSwitcher } from "@/components/org-switcher";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { DashboardProviders } from "@/components/providers/dashboard-providers";
+import { PaymentFailedBannerWrapper } from "@/components/payment-failed-banner-wrapper";
 
 export default async function DashboardGroupLayout({
   children,
@@ -33,6 +34,9 @@ export default async function DashboardGroupLayout({
   return (
     <DashboardProviders>
       <div className="min-h-screen bg-gray-50">
+        {/* Payment Failed Banner */}
+        <PaymentFailedBannerWrapper organizationId={currentOrgId} />
+
         {/* Header */}
         <header className="sticky top-0 z-30 border-b border-gray-200 bg-white">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">

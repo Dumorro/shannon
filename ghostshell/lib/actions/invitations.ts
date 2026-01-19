@@ -5,20 +5,8 @@ import { db } from "@/lib/db";
 import { getCurrentUser, hasOrgAccess, ORG_ROLES, OrgRole } from "@/lib/auth";
 import { createAuditLog } from "@/lib/audit";
 import { sendInvitationEmail } from "@/lib/email";
-
-// Team member limits by plan
-const TEAM_LIMITS: Record<string, number> = {
-  free: 1,
-  pro: 5,
-  enterprise: Infinity,
-};
-
-/**
- * Get the team member limit for a plan.
- */
-function getTeamLimit(plan: string): number {
-  return TEAM_LIMITS[plan] || TEAM_LIMITS.free;
-}
+import { getTeamMemberLimit, checkTeamMemberLimit } from "@/lib/billing/plan-limits";
+import type { PlanType } from "@/lib/billing/types";
 
 /**
  * Check if organization can add more members.
@@ -27,7 +15,7 @@ export async function canAddTeamMember(orgId: string): Promise<{
   canAdd: boolean;
   currentCount: number;
   limit: number;
-  plan: string;
+  plan: PlanType;
 }> {
   const org = await db.organization.findUnique({
     where: { id: orgId },
@@ -47,16 +35,20 @@ export async function canAddTeamMember(orgId: string): Promise<{
     throw new Error("Organization not found");
   }
 
+  const plan = org.plan as PlanType;
   const currentCount = org.memberships.length;
   const pendingInvites = org._count.invitations;
-  const limit = getTeamLimit(org.plan);
-  const totalAfterInvite = currentCount + pendingInvites;
+  const totalCurrent = currentCount + pendingInvites;
+  const limit = getTeamMemberLimit(plan);
+
+  // Use plan-limits module to check if we can add another member
+  const result = checkTeamMemberLimit(plan, totalCurrent, 1);
 
   return {
-    canAdd: totalAfterInvite < limit,
-    currentCount: currentCount + pendingInvites,
+    canAdd: result.allowed,
+    currentCount: totalCurrent,
     limit,
-    plan: org.plan,
+    plan,
   };
 }
 

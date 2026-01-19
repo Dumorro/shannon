@@ -26,9 +26,9 @@ Based on plan.md structure:
 
 **Purpose**: Install dependencies and configure environment
 
-- [ ] T001 Install stripe package: `npm install stripe` in ghostshell/package.json
-- [ ] T002 [P] Add Stripe environment variables to ghostshell/.env.example (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_PRO_ANNUAL)
-- [ ] T003 [P] Create ghostshell/lib/billing/ directory structure
+- [x] T001 Install stripe package: `npm install stripe` in ghostshell/package.json
+- [x] T002 [P] Add Stripe environment variables to ghostshell/.env.example (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_PRO_ANNUAL)
+- [x] T003 [P] Create ghostshell/lib/billing/ directory structure
 
 ---
 
@@ -40,22 +40,22 @@ Based on plan.md structure:
 
 ### Database Migration
 
-- [ ] T004 Add billing fields to Organization model in ghostshell/prisma/schema.prisma (stripeCustomerId, stripeSubscriptionId, subscriptionStatus, currentPeriodEnd, billingEmail)
-- [ ] T005 Create BillingEvent model in ghostshell/prisma/schema.prisma per data-model.md
-- [ ] T006 Create UsageRecord model in ghostshell/prisma/schema.prisma per data-model.md
-- [ ] T007 Create PlanLimits model in ghostshell/prisma/schema.prisma per data-model.md
-- [ ] T008 Run Prisma migration: `npx prisma migrate dev --name add_billing`
-- [ ] T009 Create seed script for PlanLimits data in ghostshell/prisma/seed.ts (free, pro, enterprise)
+- [x] T004 Add billing fields to Organization model in ghostshell/prisma/schema.prisma (stripeCustomerId, stripeSubscriptionId, subscriptionStatus, currentPeriodEnd, billingEmail)
+- [x] T005 Create BillingEvent model in ghostshell/prisma/schema.prisma per data-model.md
+- [x] T006 Create UsageRecord model in ghostshell/prisma/schema.prisma per data-model.md
+- [x] T007 Create PlanLimits model in ghostshell/prisma/schema.prisma per data-model.md
+- [x] T008 Run Prisma migration: `npx prisma migrate dev --name add_billing`
+- [x] T009 Create seed script for PlanLimits data in ghostshell/prisma/seed.ts (free, pro, enterprise)
 
 ### Core Utilities
 
-- [ ] T010 [P] Create Stripe client wrapper in ghostshell/lib/billing/stripe-client.ts
-- [ ] T011 [P] Create plan limits configuration in ghostshell/lib/billing/plan-limits.ts (PLAN_CONFIG with free/pro/enterprise limits)
-- [ ] T012 [P] Create billing types in ghostshell/lib/billing/types.ts (PlanType, SubscriptionStatus, BillingEventType)
+- [x] T010 [P] Create Stripe client wrapper in ghostshell/lib/billing/stripe-client.ts
+- [x] T011 [P] Create plan limits configuration in ghostshell/lib/billing/plan-limits.ts (PLAN_CONFIG with free/pro/enterprise limits)
+- [x] T012 [P] Create billing types in ghostshell/lib/billing/types.ts (PlanType, SubscriptionStatus, BillingEventType)
 
 ### Tests for Foundational
 
-- [ ] T013 [P] Unit test for plan-limits.ts in ghostshell/__tests__/unit/billing/plan-limits.test.ts
+- [x] T013 [P] Unit test for plan-limits.ts in ghostshell/__tests__/unit/billing/plan-limits.test.ts
 
 **Checkpoint**: Foundation ready - user story implementation can begin
 
@@ -69,20 +69,20 @@ Based on plan.md structure:
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Unit test for checkout action in ghostshell/__tests__/unit/billing/checkout.test.ts
-- [ ] T015 [P] [US1] Unit test for stripe-client.ts checkout functions in ghostshell/__tests__/unit/billing/stripe-client.test.ts
+- [x] T014 [P] [US1] Unit test for checkout action in ghostshell/__tests__/unit/billing/checkout.test.ts
+- [x] T015 [P] [US1] Unit test for stripe-client.ts checkout functions in ghostshell/__tests__/unit/billing/stripe-client.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Implement createCheckoutSession in ghostshell/lib/billing/stripe-client.ts
-- [ ] T017 [US1] Implement getOrCreateStripeCustomer in ghostshell/lib/billing/stripe-client.ts
-- [ ] T018 [US1] Create checkout server action in ghostshell/lib/actions/billing.ts (createCheckoutSession)
-- [ ] T019 [US1] Create POST /api/billing/checkout route in ghostshell/app/api/billing/checkout/route.ts
-- [ ] T020 [P] [US1] Create PlanComparison component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/plan-comparison.tsx
-- [ ] T021 [P] [US1] Create UpgradeButton component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/upgrade-button.tsx
-- [ ] T022 [US1] Create billing dashboard page in ghostshell/app/(dashboard)/org/[orgId]/billing/page.tsx
-- [ ] T023 [US1] Handle checkout success/cancel query params in billing page
-- [ ] T024 [US1] Add "Contact Sales" button for Enterprise tier in plan-comparison.tsx
+- [x] T016 [US1] Implement createCheckoutSession in ghostshell/lib/billing/stripe-client.ts
+- [x] T017 [US1] Implement getOrCreateStripeCustomer in ghostshell/lib/billing/stripe-client.ts
+- [x] T018 [US1] Create checkout server action in ghostshell/lib/actions/billing.ts (createCheckoutSession)
+- [x] T019 [US1] Create POST /api/billing/checkout route in ghostshell/app/api/billing/checkout/route.ts
+- [x] T020 [P] [US1] Create PlanComparison component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/plan-comparison.tsx
+- [x] T021 [P] [US1] Create UpgradeButton component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/upgrade-button.tsx
+- [x] T022 [US1] Create billing dashboard page in ghostshell/app/(dashboard)/org/[orgId]/billing/page.tsx
+- [x] T023 [US1] Handle checkout success/cancel query params in billing page
+- [x] T024 [US1] Add "Contact Sales" button for Enterprise tier in plan-comparison.tsx
 
 **Checkpoint**: Users can view plans and complete checkout - MVP functional
 
@@ -96,16 +96,16 @@ Based on plan.md structure:
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Unit test for portal action in ghostshell/__tests__/unit/billing/portal.test.ts
+- [x] T025 [P] [US2] Unit test for portal action in ghostshell/__tests__/unit/billing/portal.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Implement createPortalSession in ghostshell/lib/billing/stripe-client.ts
-- [ ] T027 [US2] Create portal server action in ghostshell/lib/actions/billing.ts (createPortalSession)
-- [ ] T028 [US2] Create POST /api/billing/portal route in ghostshell/app/api/billing/portal/route.ts
-- [ ] T029 [P] [US2] Create SubscriptionStatus component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/subscription-status.tsx
-- [ ] T030 [US2] Add "Manage Subscription" button to billing page (only for paying customers)
-- [ ] T031 [US2] Display cancellation notice when subscription marked for cancellation
+- [x] T026 [US2] Implement createPortalSession in ghostshell/lib/billing/stripe-client.ts
+- [x] T027 [US2] Create portal server action in ghostshell/lib/actions/billing.ts (createPortalSession)
+- [x] T028 [US2] Create POST /api/billing/portal route in ghostshell/app/api/billing/portal/route.ts
+- [x] T029 [P] [US2] Create SubscriptionStatus component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/subscription-status.tsx
+- [x] T030 [US2] Add "Manage Subscription" button to billing page (only for paying customers)
+- [x] T031 [US2] Display cancellation notice when subscription marked for cancellation
 
 **Checkpoint**: Paying customers can self-serve subscription management
 
@@ -126,13 +126,13 @@ Based on plan.md structure:
 
 ### Implementation for User Story 5
 
-- [ ] T034 [US5] Create webhook event handlers in ghostshell/lib/billing/webhook-handlers.ts (handleCheckoutCompleted, handlePaymentSucceeded, handlePaymentFailed, handleSubscriptionUpdated, handleSubscriptionDeleted)
-- [ ] T035 [US5] Implement idempotent event processing using stripeEventId in webhook-handlers.ts
-- [ ] T036 [US5] Create POST /api/webhooks/stripe route in ghostshell/app/api/webhooks/stripe/route.ts
-- [ ] T037 [US5] Implement webhook signature verification in route.ts
-- [ ] T038 [US5] Create BillingEvent audit logging in webhook-handlers.ts
-- [ ] T039 [US5] Add payment failed banner component in ghostshell/components/payment-failed-banner.tsx
-- [ ] T040 [US5] Integrate payment failed banner in dashboard layout
+- [x] T034 [US5] Create webhook event handlers in ghostshell/lib/billing/webhook-handlers.ts (handleCheckoutCompleted, handlePaymentSucceeded, handlePaymentFailed, handleSubscriptionUpdated, handleSubscriptionDeleted)
+- [x] T035 [US5] Implement idempotent event processing using stripeEventId in webhook-handlers.ts
+- [x] T036 [US5] Create POST /api/webhooks/stripe route in ghostshell/app/api/webhooks/stripe/route.ts
+- [x] T037 [US5] Implement webhook signature verification in route.ts
+- [x] T038 [US5] Create BillingEvent audit logging in webhook-handlers.ts
+- [x] T039 [US5] Add payment failed banner component in ghostshell/components/payment-failed-banner.tsx
+- [x] T040 [US5] Integrate payment failed banner in dashboard layout
 
 **Checkpoint**: Webhooks sync subscription state reliably
 
@@ -146,18 +146,18 @@ Based on plan.md structure:
 
 ### Tests for User Story 3
 
-- [ ] T041 [P] [US3] Unit test for usage-tracker.ts in ghostshell/__tests__/unit/billing/usage-tracker.test.ts
+- [x] T041 [P] [US3] Unit test for usage-tracker.ts in ghostshell/__tests__/unit/billing/usage-tracker.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T042 [US3] Create usage tracking service in ghostshell/lib/billing/usage-tracker.ts (recordTokenUsage, getCurrentPeriodUsage, checkUsageAllowance)
-- [ ] T043 [US3] Implement getOrCreateUsageRecord in usage-tracker.ts
-- [ ] T044 [US3] Create GET /api/org/[orgId]/usage route in ghostshell/app/api/org/[orgId]/usage/route.ts
-- [ ] T045 [P] [US3] Create UsageIndicator component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/usage-indicator.tsx
-- [ ] T046 [US3] Add usage display to billing dashboard page
-- [ ] T047 [US3] Implement 80% threshold notification in usage-tracker.ts (sendUsageAlert)
-- [ ] T048 [US3] Create usage alert email template in ghostshell/lib/email/templates/usage-alert.tsx
-- [ ] T049 [US3] Implement reportOverageToStripe for metered billing in usage-tracker.ts
+- [x] T042 [US3] Create usage tracking service in ghostshell/lib/billing/usage-tracker.ts (recordTokenUsage, getCurrentPeriodUsage, checkUsageAllowance)
+- [x] T043 [US3] Implement getOrCreateUsageRecord in usage-tracker.ts
+- [x] T044 [US3] Create GET /api/org/[orgId]/usage route in ghostshell/app/api/org/[orgId]/usage/route.ts
+- [x] T045 [P] [US3] Create UsageIndicator component in ghostshell/app/(dashboard)/org/[orgId]/billing/components/usage-indicator.tsx
+- [x] T046 [US3] Add usage display to billing dashboard page
+- [x] T047 [US3] Implement 80% threshold notification in usage-tracker.ts (sendUsageAlert)
+- [x] T048 [US3] Create usage alert email template in ghostshell/lib/email/templates/usage-alert.tsx
+- [x] T049 [US3] Implement reportOverageToStripe for metered billing in usage-tracker.ts
 
 **Checkpoint**: Token usage tracked and displayed with notifications
 
@@ -171,20 +171,20 @@ Based on plan.md structure:
 
 ### Tests for User Story 4
 
-- [ ] T050 [P] [US4] Unit test for limit checks in ghostshell/__tests__/unit/billing/plan-enforcement.test.ts
+- [x] T050 [P] [US4] Unit test for limit checks in ghostshell/__tests__/unit/billing/plan-enforcement.test.ts
 
 ### Implementation for User Story 4
 
-- [ ] T051 [US4] Create checkConcurrentScanLimit in ghostshell/lib/billing/plan-limits.ts
-- [ ] T052 [US4] Create checkTeamMemberLimit in ghostshell/lib/billing/plan-limits.ts
-- [ ] T053 [US4] Create checkScanDurationLimit in ghostshell/lib/billing/plan-limits.ts
-- [ ] T054 [US4] Create hasFeatureAccess in ghostshell/lib/billing/plan-limits.ts
-- [ ] T055 [US4] Update ghostshell/lib/scan-queue.ts to use plan-based concurrent limits
-- [ ] T056 [US4] Update ghostshell/lib/actions/invitations.ts to use plan-based team limits
-- [ ] T057 [P] [US4] Create UpgradePrompt component in ghostshell/components/upgrade-prompt.tsx
-- [ ] T058 [US4] Add limit displays to billing dashboard (usage vs limits)
-- [ ] T059 [US4] Integrate upgrade prompts in scan creation flow
-- [ ] T060 [US4] Integrate upgrade prompts in team invitation flow
+- [x] T051 [US4] Create checkConcurrentScanLimit in ghostshell/lib/billing/plan-limits.ts
+- [x] T052 [US4] Create checkTeamMemberLimit in ghostshell/lib/billing/plan-limits.ts
+- [x] T053 [US4] Create checkScanDurationLimit in ghostshell/lib/billing/plan-limits.ts
+- [x] T054 [US4] Create hasFeatureAccess in ghostshell/lib/billing/plan-limits.ts
+- [x] T055 [US4] Update ghostshell/lib/scan-queue.ts to use plan-based concurrent limits
+- [x] T056 [US4] Update ghostshell/lib/actions/invitations.ts to use plan-based team limits
+- [x] T057 [P] [US4] Create UpgradePrompt component in ghostshell/components/upgrade-prompt.tsx
+- [x] T058 [US4] Add limit displays to billing dashboard (usage vs limits)
+- [x] T059 [US4] Integrate upgrade prompts in scan creation flow
+- [x] T060 [US4] Integrate upgrade prompts in team invitation flow
 
 **Checkpoint**: Plan limits enforced with clear upgrade messaging
 
@@ -198,16 +198,16 @@ Based on plan.md structure:
 
 ### Tests for User Story 6
 
-- [ ] T061 [P] [US6] Unit test for annual pricing calculations in ghostshell/__tests__/unit/billing/annual-pricing.test.ts
+- [x] T061 [P] [US6] Unit test for annual pricing calculations in ghostshell/__tests__/unit/billing/annual-pricing.test.ts
 
 ### Implementation for User Story 6
 
-- [ ] T062 [US6] Add annual price support to plan-limits.ts (getAnnualPrice, getAnnualSavings)
-- [ ] T063 [US6] Update createCheckoutSession to support annual priceId in stripe-client.ts
-- [ ] T064 [US6] Add billing interval toggle to plan-comparison.tsx (Monthly/Annual)
-- [ ] T065 [US6] Display annual savings in plan-comparison.tsx ("Save $198/year")
-- [ ] T066 [US6] Add renewal date display for annual subscribers in subscription-status.tsx
-- [ ] T067 [US6] Create renewal reminder email template in ghostshell/lib/email/templates/renewal-reminder.tsx
+- [x] T062 [US6] Add annual price support to plan-limits.ts (getAnnualPrice, getAnnualSavings)
+- [x] T063 [US6] Update createCheckoutSession to support annual priceId in stripe-client.ts
+- [x] T064 [US6] Add billing interval toggle to plan-comparison.tsx (Monthly/Annual)
+- [x] T065 [US6] Display annual savings in plan-comparison.tsx ("Save $198/year")
+- [x] T066 [US6] Add renewal date display for annual subscribers in subscription-status.tsx
+- [x] T067 [US6] Create renewal reminder email template in ghostshell/lib/email/templates/renewal-reminder.tsx
 
 **Checkpoint**: Annual billing available with discount messaging
 
@@ -217,11 +217,11 @@ Based on plan.md structure:
 
 **Purpose**: Final improvements across all user stories
 
-- [ ] T068 [P] Create GET /api/org/[orgId]/billing route in ghostshell/app/api/org/[orgId]/billing/route.ts (combined billing info)
-- [ ] T069 [P] Add billing access control middleware (Owner/Admin = manage, Member = view usage, Viewer = no access)
-- [ ] T070 [P] Add error handling for Stripe service unavailability in checkout/portal routes
-- [ ] T071 [P] Add structured logging for all billing operations
-- [ ] T072 Run all billing tests and verify 70% coverage target
+- [x] T068 [P] Create GET /api/org/[orgId]/billing route in ghostshell/app/api/org/[orgId]/billing/route.ts (combined billing info)
+- [x] T069 [P] Add billing access control middleware (Owner/Admin = manage, Member = view usage, Viewer = no access)
+- [x] T070 [P] Add error handling for Stripe service unavailability in checkout/portal routes
+- [x] T071 [P] Add structured logging for all billing operations
+- [x] T072 Run all billing tests and verify 70% coverage target
 - [ ] T073 Manual validation using quickstart.md scenarios
 
 ---
