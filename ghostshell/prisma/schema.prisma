@@ -47,6 +47,13 @@ model Organization {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
+  // Billing fields (Epic 010)
+  stripeCustomerId     String?   @unique // Stripe customer ID for API calls
+  stripeSubscriptionId String?   @unique // Active subscription ID
+  subscriptionStatus   String    @default("inactive") // active, past_due, canceled, inactive
+  currentPeriodEnd     DateTime? // When current billing period ends
+  billingEmail         String?   // Optional billing contact override
+
   memberships OrganizationMembership[]
   auditLogs   AuditLog[]
   projects    Project[]
@@ -65,9 +72,15 @@ model Organization {
   // Container isolation relations (Epic 006)
   scanContainers ScanContainer[]
 
+  // Billing relations (Epic 010)
+  billingEvents BillingEvent[]
+  usageRecords  UsageRecord[]
+
   @@index([deletedAt])
   @@index([plan])
   @@index([createdAt])
+  @@index([subscriptionStatus])
+  @@index([currentPeriodEnd])
 }
 
 // Organization membership with role
@@ -800,4 +813,57 @@ model ContainerMetrics {
 
   @@index([scanContainerId, timestamp(sort: Desc)])
   @@index([timestamp])
+}
+
+// ===================
+// Billing & Subscriptions Feature (Epic 010)
+// ===================
+
+// BillingEvent - Audit trail for all billing lifecycle events
+model BillingEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  eventType      String // checkout_started, checkout_completed, payment_succeeded, payment_failed, subscription_updated, subscription_canceled, usage_reported
+  stripeEventId  String   @unique // Stripe event ID for deduplication/idempotency
+  metadata       Json? // Event-specific data
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+// UsageRecord - Tracks LLM token consumption per organization per billing period
+model UsageRecord {
+  id               String   @id @default(cuid())
+  organizationId   String
+  periodStart      DateTime
+  periodEnd        DateTime
+  tokensUsed       Int      @default(0) // Cumulative tokens consumed
+  tokensAllowance  Int // Plan-based allowance
+  reportedToStripe Boolean  @default(false) // Whether overage reported
+  createdAt        DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodStart])
+  @@index([organizationId])
+  @@index([periodEnd])
+}
+
+// PlanLimits - Static configuration for plan-based limits (seeded via migration)
+model PlanLimits {
+  id                    String   @id @default(cuid())
+  planName              String   @unique // free, pro, enterprise
+  concurrentScans       Int
+  teamMembers           Int // Use MAX_INT (2147483647) for unlimited
+  scanDurationMinutes   Int
+  monthlyTokenAllowance Int
+  features              Json // Feature flags: { customReports, apiAccess, scheduledScans }
+  monthlyPriceUsd       Int // Price in cents
+  annualPriceUsd        Int? // Annual price in cents (null for free/enterprise)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
