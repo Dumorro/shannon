@@ -11,6 +11,7 @@ import {
 import type { BillingInfo } from "@/lib/billing/types";
 import { PlanComparison } from "./components/plan-comparison";
 import { SubscriptionStatusCard } from "./components/subscription-status";
+import { UsageIndicator } from "./components/usage-indicator";
 
 export default function BillingPage() {
   const params = useParams();
@@ -131,6 +132,11 @@ export default function BillingPage() {
         organizationId={orgId}
         canManage={canManage}
       />
+
+      {/* Usage Indicator */}
+      <section>
+        <UsageIndicator organizationId={orgId} />
+      </section>
 
       {/* Plan Comparison */}
       <section>
