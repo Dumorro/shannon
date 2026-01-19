@@ -131,15 +131,15 @@
 
 **Purpose**: Meet GhostShell testing requirements (70% coverage target)
 
-- [ ] T042a [P] [US1] Write unit tests for getFinding and updateFindingStatus in ghostshell/__tests__/unit/actions/findings.test.ts
-- [ ] T042b [P] [US1] Write component tests for FindingDetail and FindingStatusSelect in ghostshell/__tests__/components/findings/
-- [ ] T042c [P] [US2] Write unit tests for addFindingNote and getFindingActivity in ghostshell/__tests__/unit/actions/findings.test.ts
-- [ ] T042d [P] [US2] Write component tests for FindingNoteForm and FindingActivity in ghostshell/__tests__/components/findings/
-- [ ] T042e [P] [US3] Write unit tests for listFindings and getFindingsSummary in ghostshell/__tests__/unit/actions/findings.test.ts
-- [ ] T042f [P] [US3] Write component tests for FindingsList, FindingsFilters, FindingsSearch in ghostshell/__tests__/components/findings/
-- [ ] T042g [P] [US4] Write unit tests for bulkUpdateFindingStatus in ghostshell/__tests__/unit/actions/findings.test.ts
-- [ ] T042h [P] [US4] Write component tests for FindingsBulkActions and BulkStatusModal in ghostshell/__tests__/components/findings/
-- [ ] T042i Run npm run test:coverage and verify ≥70% coverage for new code
+- [x] T042a [P] [US1] Write unit tests for getFinding and updateFindingStatus in ghostshell/__tests__/unit/actions/findings.test.ts
+- [x] T042b [P] [US1] Write component tests for FindingDetail and FindingStatusSelect in ghostshell/__tests__/components/findings/
+- [x] T042c [P] [US2] Write unit tests for addFindingNote and getFindingActivity in ghostshell/__tests__/unit/actions/findings.test.ts
+- [x] T042d [P] [US2] Write component tests for FindingNoteForm and FindingActivity in ghostshell/__tests__/components/findings/
+- [x] T042e [P] [US3] Write unit tests for listFindings and getFindingsSummary in ghostshell/__tests__/unit/actions/findings.test.ts
+- [x] T042f [P] [US3] Write component tests for FindingsList, FindingsFilters, FindingsSearch in ghostshell/__tests__/components/findings/
+- [x] T042g [P] [US4] Write unit tests for bulkUpdateFindingStatus in ghostshell/__tests__/unit/actions/findings.test.ts
+- [x] T042h [P] [US4] Write component tests for FindingsBulkActions and BulkStatusModal in ghostshell/__tests__/components/findings/
+- [x] T042i Run npm run test:coverage and verify ≥70% coverage for new code
 
 **Checkpoint**: Test coverage meets constitution requirements
 
@@ -156,7 +156,7 @@
 - [x] T047 [P] Ensure mobile responsiveness for all findings components
 - [x] T048 Final code review for security (org access checks on all queries)
 - [x] T049 [P] Implement scheduled audit log cleanup job to purge entries older than 2 years (per FR-017)
-- [ ] T049a Create seed script to generate 10K findings for performance testing in ghostshell/prisma/seed-performance.ts
+- [x] T049a Create seed script to generate 10K findings for performance testing in ghostshell/prisma/seed-performance.ts
 - [ ] T050 Manual performance validation: verify filter <1s, bulk 50 findings <5s, search <2s using browser DevTools with 10K findings dataset
 
 ---
