@@ -13,7 +13,13 @@
       "Bash(powershell -ExecutionPolicy Bypass -File \".specify/scripts/powershell/check-prerequisites.ps1\" -Json -RequireTasks -IncludeTasks)",
       "Bash(test:*)",
       "Bash(npx prisma migrate:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\ndocs\\(009-terraform-infrastructure\\): add feature specification with clarifications\n\nDefine Terraform infrastructure deployment structure \\(IaaS\\) specification:\n- 5 user stories covering provisioning, environments, state, modules, auditing\n- 14 functional requirements for AWS infrastructure components\n- 10 clarifications covering cloud scope, recovery, drift, versioning, security\n- Edge cases for failures, drift detection, and state corruption\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"c:/dev/code/shannon/.speckit/scripts/powershell/setup-plan.ps1\" -Json)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"c:/dev/code/shannon/.specify/scripts/powershell/update-agent-context.ps1\" -AgentType claude)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"c:/dev/code/shannon/.speckit/scripts/powershell/check-prerequisites.ps1\" -Json)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat\\(infrastructure\\): implement Terraform infrastructure for AWS\n\nImplement Phases 1-4 of Terraform infrastructure deployment:\n\nPhase 1 - Setup:\n- Add .terraform-version \\(1.6.0\\) and .tflint.hcl configuration\n- Add infrastructure README with project documentation\n- Update .gitignore with Terraform patterns\n\nPhase 2 - Bootstrap:\n- Create bootstrap module for S3 state bucket and DynamoDB lock table\n- Configure encryption, versioning, and public access blocking\n\nPhase 3 - Networking Module + Dev Environment:\n- Implement networking module with VPC, subnets, gateways, route tables\n- Add security groups for ALB, app servers, and databases\n- Create dev environment with module composition\n\nPhase 4 - Staging + Production Environments:\n- Add staging environment \\(t3.small, single NAT, 10.1.0.0/16\\)\n- Add production environment \\(t3.medium, multi-AZ NAT, 3 AZs, 10.2.0.0/16\\)\n\nAlso updates spec.md with 5 additional clarifications and marks 33 tasks\ncomplete in tasks.md.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ],
     "deny": [],
     "ask": []

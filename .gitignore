@@ -24,6 +24,7 @@ ghostshell/prisma/migrations/*_migration.sql.backup
 .vscode/
 *.swp
 *.swo
+.claude/settings.local.json
 
 # OS
 .DS_Store
