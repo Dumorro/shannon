@@ -53,7 +53,7 @@ specs/003-findings-remediation/
 ### Source Code (repository root)
 
 ```text
-web/
+ghostshell/
 ├── prisma/
 │   └── schema.prisma        # Extend Finding model, add FindingNote, FindingActivity
 ├── lib/
@@ -70,15 +70,6 @@ web/
 │   │   └── scans/
 │   │       └── [scanId]/
 │   │           └── page.tsx # MODIFY: Link to finding details
-│   └── api/
-│       └── findings/
-│           ├── route.ts     # NEW: List/search findings API
-│           └── [findingId]/
-│               ├── route.ts # NEW: Get/update finding
-│               ├── status/
-│               │   └── route.ts # NEW: Status change endpoint
-│               └── notes/
-│                   └── route.ts # NEW: Add/list notes
 └── components/
     ├── findings/
     │   ├── finding-detail.tsx      # NEW: Detail view component
@@ -92,7 +83,7 @@ web/
         └── findings-widget.tsx     # NEW: Dashboard summary widget
 ```
 
-**Structure Decision**: Web application pattern - extends existing Next.js app router structure under `web/`. New routes under `(dashboard)/findings/` for cross-scan view, new components under `components/findings/`.
+**Structure Decision**: Web application pattern - extends existing Next.js app router structure under `ghostshell/`. New routes under `(dashboard)/findings/` for cross-scan view, new components under `components/findings/`.
 
 ## Complexity Tracking
 

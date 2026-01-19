@@ -256,4 +256,4 @@ ORDER BY a.createdAt DESC;
 **Audit Log Retention Implementation**:
 - AuditLog entries persist even after Finding/Scan deletion
 - `onDelete: SetNull` for user reference preserves log with null userId
-- Background job (future) to purge logs older than 2 years
+- Scheduled cleanup job (T049) purges logs older than 2 years

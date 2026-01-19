@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-- Shannon web application running locally (`cd web && npm run dev`)
+- GhostShell web application running locally (`cd ghostshell && npm run dev`)
 - PostgreSQL database with existing schema
 - At least one completed scan with findings
 
@@ -23,7 +23,7 @@ Follow user story priorities for incremental delivery:
    npx prisma migrate dev --name add-finding-notes
    ```
 
-2. **Server Actions** (`web/lib/actions/findings.ts`)
+2. **Server Actions** (`ghostshell/lib/actions/findings.ts`)
    - `getFinding(findingId)` - Get single finding with evidence
    - `updateFindingStatus(findingId, status, justification?)` - Update status
 
@@ -46,7 +46,7 @@ Follow user story priorities for incremental delivery:
 
 **Goal**: Add notes and view activity timeline.
 
-1. **Server Actions** (`web/lib/actions/findings.ts`)
+1. **Server Actions** (`ghostshell/lib/actions/findings.ts`)
    - `addFindingNote(findingId, content)` - Add note
    - `getFindingActivity(findingId)` - Get merged timeline
 
@@ -66,7 +66,7 @@ Follow user story priorities for incremental delivery:
 
 **Goal**: Cross-scan findings view with filters.
 
-1. **Server Actions** (`web/lib/actions/findings.ts`)
+1. **Server Actions** (`ghostshell/lib/actions/findings.ts`)
    - `listFindings(filters, pagination)` - Cross-scan query
 
 2. **Components**
@@ -93,7 +93,7 @@ Follow user story priorities for incremental delivery:
 
 **Goal**: Update multiple findings at once.
 
-1. **Server Actions** (`web/lib/actions/findings.ts`)
+1. **Server Actions** (`ghostshell/lib/actions/findings.ts`)
    - `bulkUpdateFindingStatus(findingIds, status, justification?)` - Bulk update
 
 2. **Components**
@@ -110,7 +110,7 @@ Follow user story priorities for incremental delivery:
 ## Key Files to Create
 
 ```
-web/
+ghostshell/
 ├── prisma/
 │   └── migrations/
 │       └── YYYYMMDD_add_finding_notes/

@@ -3,7 +3,7 @@
 **Input**: Design documents from `/specs/003-findings-remediation/`
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/api.md, quickstart.md
 
-**Tests**: Tests are NOT explicitly requested. Manual testing via quickstart.md scenarios.
+**Tests**: Tests REQUIRED per constitution (GhostShell 70% coverage target). Unit tests for server actions, component tests for React components.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing.
 
@@ -11,7 +11,7 @@
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (US1, US2, US3, US4)
-- Paths assume `web/` as the working directory per plan.md
+- Paths assume `ghostshell/` as the working directory per plan.md
 
 ---
 
@@ -19,13 +19,13 @@
 
 **Purpose**: Database schema updates and shared types
 
-- [x] T001 Create Prisma migration for FindingNote model in web/prisma/migrations/
-- [x] T002 [P] Add FindingNote model to web/prisma/schema.prisma with relations to Finding and User
-- [x] T003 [P] Add notes relation to existing Finding model in web/prisma/schema.prisma
-- [x] T004 [P] Add findingNotes relation to existing User model in web/prisma/schema.prisma
-- [x] T005 [P] Add composite index [status, severity] on Finding for cross-scan queries in web/prisma/schema.prisma
+- [x] T001 Create Prisma migration for FindingNote model in ghostshell/prisma/migrations/
+- [x] T002 [P] Add FindingNote model to ghostshell/prisma/schema.prisma with relations to Finding and User
+- [x] T003 [P] Add notes relation to existing Finding model in ghostshell/prisma/schema.prisma
+- [x] T004 [P] Add findingNotes relation to existing User model in ghostshell/prisma/schema.prisma
+- [x] T005 [P] Add composite index [status, severity] on Finding for cross-scan queries in ghostshell/prisma/schema.prisma
 - [x] T006 Run prisma migrate dev to apply schema changes
-- [x] T007 [P] Create shared TypeScript types for findings in web/lib/types/findings.ts
+- [x] T007 [P] Create shared TypeScript types for findings in ghostshell/lib/types/findings.ts
 
 ---
 
@@ -35,11 +35,11 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [x] T008 Create web/lib/actions/findings.ts with "use server" directive and imports
-- [x] T009 Implement getFinding(findingId) server action with org access check in web/lib/actions/findings.ts
-- [x] T010 Implement updateFindingStatus(findingId, status, justification?) server action with audit log in web/lib/actions/findings.ts
-- [x] T011 [P] Create web/components/findings/ directory for all finding components
-- [x] T012 [P] Create findings route group at web/app/(dashboard)/findings/ with layout.tsx
+- [x] T008 Create ghostshell/lib/actions/findings.ts with "use server" directive and imports
+- [x] T009 Implement getFinding(findingId) server action with org access check in ghostshell/lib/actions/findings.ts
+- [x] T010 Implement updateFindingStatus(findingId, status, justification?) server action with audit log in ghostshell/lib/actions/findings.ts
+- [x] T011 [P] Create ghostshell/components/findings/ directory for all finding components
+- [x] T012 [P] Create findings route group at ghostshell/app/(dashboard)/findings/ with layout.tsx
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -53,10 +53,10 @@
 
 ### Implementation for User Story 1
 
-- [x] T013 [P] [US1] Create FindingStatusSelect component with justification modal in web/components/findings/finding-status-select.tsx
-- [x] T014 [P] [US1] Create FindingDetail component displaying all finding fields in web/components/findings/finding-detail.tsx
-- [x] T015 [P] [US1] Create EvidenceDisplay component for formatting evidence JSON in web/components/findings/evidence-display.tsx
-- [x] T016 [US1] Create finding detail page at web/app/(dashboard)/findings/[findingId]/page.tsx
+- [x] T013 [P] [US1] Create FindingStatusSelect component with justification modal in ghostshell/components/findings/finding-status-select.tsx
+- [x] T014 [P] [US1] Create FindingDetail component displaying all finding fields in ghostshell/components/findings/finding-detail.tsx
+- [x] T015 [P] [US1] Create EvidenceDisplay component for formatting evidence JSON in ghostshell/components/findings/evidence-display.tsx
+- [x] T016 [US1] Create finding detail page at ghostshell/app/(dashboard)/findings/[findingId]/page.tsx
 - [x] T017 [US1] Add "View Details" link from scan detail page findings table to /dashboard/findings/[findingId]
 - [x] T018 [US1] Add client-side optimistic update and error handling to FindingStatusSelect
 
@@ -72,12 +72,12 @@
 
 ### Implementation for User Story 2
 
-- [x] T019 [P] [US2] Implement addFindingNote(findingId, content) server action in web/lib/actions/findings.ts
-- [x] T020 [P] [US2] Implement getFindingActivity(findingId) server action returning merged notes + status changes in web/lib/actions/findings.ts
-- [x] T021 [P] [US2] Create FindingNoteForm component with text input and submit in web/components/findings/finding-note-form.tsx
-- [x] T022 [P] [US2] Create ActivityEntry component for individual timeline items in web/components/findings/activity-entry.tsx
-- [x] T023 [US2] Create FindingActivity component with timeline display in web/components/findings/finding-activity.tsx
-- [x] T024 [US2] Integrate FindingNoteForm and FindingActivity into finding detail page at web/app/(dashboard)/findings/[findingId]/page.tsx
+- [x] T019 [P] [US2] Implement addFindingNote(findingId, content) server action in ghostshell/lib/actions/findings.ts
+- [x] T020 [P] [US2] Implement getFindingActivity(findingId) server action returning merged notes + status changes in ghostshell/lib/actions/findings.ts
+- [x] T021 [P] [US2] Create FindingNoteForm component with text input and submit in ghostshell/components/findings/finding-note-form.tsx
+- [x] T022 [P] [US2] Create ActivityEntry component for individual timeline items in ghostshell/components/findings/activity-entry.tsx
+- [x] T023 [US2] Create FindingActivity component with timeline display in ghostshell/components/findings/finding-activity.tsx
+- [x] T024 [US2] Integrate FindingNoteForm and FindingActivity into finding detail page at ghostshell/app/(dashboard)/findings/[findingId]/page.tsx
 - [x] T025 [US2] Add optimistic updates for note submission and activity refresh
 
 **Checkpoint**: User Story 2 complete - can add notes and view full activity history
@@ -92,15 +92,15 @@
 
 ### Implementation for User Story 3
 
-- [x] T026 [P] [US3] Implement listFindings(filters, pagination) server action with cursor pagination in web/lib/actions/findings.ts
-- [x] T027 [P] [US3] Implement getFindingsSummary() server action for dashboard widget in web/lib/actions/findings.ts
-- [x] T028 [P] [US3] Create FindingsFilters component with severity/status/category dropdowns in web/components/findings/findings-filters.tsx
-- [x] T029 [P] [US3] Create FindingsSearch component with debounced text input in web/components/findings/findings-search.tsx
-- [x] T030 [P] [US3] Create FindingsListItem component for individual finding row in web/components/findings/findings-list-item.tsx
-- [x] T031 [US3] Create FindingsList component with pagination and loading states in web/components/findings/findings-list.tsx
-- [x] T032 [US3] Create cross-scan findings page at web/app/(dashboard)/findings/page.tsx
-- [x] T033 [US3] Create FindingsWidget dashboard summary component in web/components/dashboard/findings-widget.tsx
-- [x] T034 [US3] Integrate FindingsWidget into main dashboard page at web/app/(dashboard)/page.tsx
+- [x] T026 [P] [US3] Implement listFindings(filters, pagination) server action with cursor pagination in ghostshell/lib/actions/findings.ts
+- [x] T027 [P] [US3] Implement getFindingsSummary(filters?) server action with optional filter support for dashboard widget in ghostshell/lib/actions/findings.ts (FR-010: filtered stats)
+- [x] T028 [P] [US3] Create FindingsFilters component with severity/status/category dropdowns in ghostshell/components/findings/findings-filters.tsx
+- [x] T029 [P] [US3] Create FindingsSearch component with debounced text input in ghostshell/components/findings/findings-search.tsx
+- [x] T030 [P] [US3] Create FindingsListItem component for individual finding row in ghostshell/components/findings/findings-list-item.tsx
+- [x] T031 [US3] Create FindingsList component with pagination and loading states in ghostshell/components/findings/findings-list.tsx
+- [x] T032 [US3] Create cross-scan findings page at ghostshell/app/(dashboard)/findings/page.tsx
+- [x] T033 [US3] Create FindingsWidget dashboard summary component in ghostshell/components/dashboard/findings-widget.tsx
+- [x] T034 [US3] Integrate FindingsWidget into main dashboard page at ghostshell/app/(dashboard)/page.tsx
 - [x] T035 [US3] Add filter chips display showing active filters with clear functionality
 - [x] T036 [US3] Add "No findings match your filters" empty state with clear filters button
 
@@ -116,14 +116,32 @@
 
 ### Implementation for User Story 4
 
-- [x] T037 [P] [US4] Implement bulkUpdateFindingStatus(findingIds, status, justification?) server action in web/lib/actions/findings.ts
-- [x] T038 [P] [US4] Create BulkStatusModal component with confirmation and optional justification in web/components/findings/bulk-status-modal.tsx
-- [x] T039 [US4] Create FindingsBulkActions toolbar component with select all, count, action buttons in web/components/findings/findings-bulk-actions.tsx
-- [x] T040 [US4] Add selection state management (checkboxes) to FindingsList component in web/components/findings/findings-list.tsx
-- [x] T041 [US4] Integrate FindingsBulkActions toolbar into findings list page at web/app/(dashboard)/findings/page.tsx
+- [x] T037 [P] [US4] Implement bulkUpdateFindingStatus(findingIds, status, justification?) server action in ghostshell/lib/actions/findings.ts
+- [x] T038 [P] [US4] Create BulkStatusModal component with confirmation and optional justification in ghostshell/components/findings/bulk-status-modal.tsx
+- [x] T039 [US4] Create FindingsBulkActions toolbar component with select all, count, action buttons in ghostshell/components/findings/findings-bulk-actions.tsx
+- [x] T040 [US4] Add selection state management (checkboxes) to FindingsList component in ghostshell/components/findings/findings-list.tsx
+- [x] T041 [US4] Integrate FindingsBulkActions toolbar into findings list page at ghostshell/app/(dashboard)/findings/page.tsx
 - [x] T042 [US4] Add loading states and error handling for bulk operations
 
 **Checkpoint**: User Story 4 complete - can select and bulk update multiple findings
+
+---
+
+## Phase 6.5: Test Coverage (Required per Constitution)
+
+**Purpose**: Meet GhostShell testing requirements (70% coverage target)
+
+- [ ] T042a [P] [US1] Write unit tests for getFinding and updateFindingStatus in ghostshell/__tests__/unit/actions/findings.test.ts
+- [ ] T042b [P] [US1] Write component tests for FindingDetail and FindingStatusSelect in ghostshell/__tests__/components/findings/
+- [ ] T042c [P] [US2] Write unit tests for addFindingNote and getFindingActivity in ghostshell/__tests__/unit/actions/findings.test.ts
+- [ ] T042d [P] [US2] Write component tests for FindingNoteForm and FindingActivity in ghostshell/__tests__/components/findings/
+- [ ] T042e [P] [US3] Write unit tests for listFindings and getFindingsSummary in ghostshell/__tests__/unit/actions/findings.test.ts
+- [ ] T042f [P] [US3] Write component tests for FindingsList, FindingsFilters, FindingsSearch in ghostshell/__tests__/components/findings/
+- [ ] T042g [P] [US4] Write unit tests for bulkUpdateFindingStatus in ghostshell/__tests__/unit/actions/findings.test.ts
+- [ ] T042h [P] [US4] Write component tests for FindingsBulkActions and BulkStatusModal in ghostshell/__tests__/components/findings/
+- [ ] T042i Run npm run test:coverage and verify ≥70% coverage for new code
+
+**Checkpoint**: Test coverage meets constitution requirements
 
 ---
 
@@ -132,12 +150,13 @@
 **Purpose**: Final validation and improvements across all stories
 
 - [x] T043 [P] Add loading skeletons to FindingDetail, FindingsList, and FindingActivity components
-- [ ] T044 [P] Add keyboard shortcuts for status changes in FindingStatusSelect (optional enhancement)
+- [ ] T044 [P] [STRETCH] Add keyboard shortcuts for status changes in FindingStatusSelect (UX improvement, no FR linkage)
 - [x] T045 Verify all server actions have proper revalidatePath calls for cache invalidation
-- [ ] T046 Run quickstart.md validation scenarios for all user stories
+- [ ] T046 Validate all user stories against quickstart.md Testing Checklist (lines 229-241)
 - [x] T047 [P] Ensure mobile responsiveness for all findings components
 - [x] T048 Final code review for security (org access checks on all queries)
 - [x] T049 [P] Implement scheduled audit log cleanup job to purge entries older than 2 years (per FR-017)
+- [ ] T049a Create seed script to generate 10K findings for performance testing in ghostshell/prisma/seed-performance.ts
 - [ ] T050 Manual performance validation: verify filter <1s, bulk 50 findings <5s, search <2s using browser DevTools with 10K findings dataset
 
 ---
@@ -183,12 +202,12 @@
 
 ```bash
 # Launch all parallelizable tasks for User Story 1 together:
-Task: "Create FindingStatusSelect component in web/components/findings/finding-status-select.tsx"
-Task: "Create FindingDetail component in web/components/findings/finding-detail.tsx"
-Task: "Create EvidenceDisplay component in web/components/findings/evidence-display.tsx"
+Task: "Create FindingStatusSelect component in ghostshell/components/findings/finding-status-select.tsx"
+Task: "Create FindingDetail component in ghostshell/components/findings/finding-detail.tsx"
+Task: "Create EvidenceDisplay component in ghostshell/components/findings/evidence-display.tsx"
 
 # Then sequentially:
-Task: "Create finding detail page at web/app/(dashboard)/findings/[findingId]/page.tsx"
+Task: "Create finding detail page at ghostshell/app/(dashboard)/findings/[findingId]/page.tsx"
 ```
 
 ---
@@ -197,15 +216,15 @@ Task: "Create finding detail page at web/app/(dashboard)/findings/[findingId]/pa
 
 ```bash
 # Launch all parallelizable server actions and components:
-Task: "Implement listFindings server action in web/lib/actions/findings.ts"
-Task: "Implement getFindingsSummary server action in web/lib/actions/findings.ts"
-Task: "Create FindingsFilters component in web/components/findings/findings-filters.tsx"
-Task: "Create FindingsSearch component in web/components/findings/findings-search.tsx"
-Task: "Create FindingsListItem component in web/components/findings/findings-list-item.tsx"
+Task: "Implement listFindings server action in ghostshell/lib/actions/findings.ts"
+Task: "Implement getFindingsSummary server action in ghostshell/lib/actions/findings.ts"
+Task: "Create FindingsFilters component in ghostshell/components/findings/findings-filters.tsx"
+Task: "Create FindingsSearch component in ghostshell/components/findings/findings-search.tsx"
+Task: "Create FindingsListItem component in ghostshell/components/findings/findings-list-item.tsx"
 
 # Then sequentially:
-Task: "Create FindingsList component in web/components/findings/findings-list.tsx"
-Task: "Create cross-scan findings page at web/app/(dashboard)/findings/page.tsx"
+Task: "Create FindingsList component in ghostshell/components/findings/findings-list.tsx"
+Task: "Create cross-scan findings page at ghostshell/app/(dashboard)/findings/page.tsx"
 ```
 
 ---

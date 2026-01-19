@@ -377,7 +377,7 @@ interface GetSummaryResponse {
 For client components using server actions instead of fetch:
 
 ```typescript
-// web/lib/actions/findings.ts
+// ghostshell/lib/actions/findings.ts
 
 export async function listFindings(
   filters?: FindingFilters,
