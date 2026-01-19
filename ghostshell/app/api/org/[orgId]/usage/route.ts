@@ -22,10 +22,23 @@ export async function GET(
     const { orgId } = await params;
 
     // Verify user has access to this organization
-    const membership = await db.membership.findFirst({
+    // First get the internal user ID from Clerk ID
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found", code: "NOT_FOUND" },
+        { status: 404 }
+      );
+    }
+
+    const membership = await db.organizationMembership.findFirst({
       where: {
         organizationId: orgId,
-        userId,
+        userId: user.id,
       },
       select: { role: true },
     });
