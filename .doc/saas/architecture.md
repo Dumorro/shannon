@@ -255,6 +255,8 @@ erDiagram
     Organization ||--o{ ReportTemplate : "customizes"
     Organization ||--o{ APIKey : "owns"
     Organization ||--o{ ReportJob : "generates"
+    Organization ||--o{ BillingEvent : "logs"
+    Organization ||--o{ UsageRecord : "tracks usage"
 
     User ||--o{ OrganizationMembership : "belongs to"
     OrganizationMembership }o--|| Organization : "member of"
@@ -287,6 +289,10 @@ erDiagram
         string name
         string slug
         string plan
+        string stripeCustomerId
+        string stripeSubscriptionId
+        string subscriptionStatus
+        datetime currentPeriodEnd
         datetime createdAt
     }
 
@@ -385,6 +391,36 @@ erDiagram
         string status
         int riskScore
         string storagePath
+    }
+
+    BillingEvent {
+        string id PK
+        string organizationId FK
+        string eventType
+        string stripeEventId
+        json metadata
+        datetime createdAt
+    }
+
+    UsageRecord {
+        string id PK
+        string organizationId FK
+        datetime periodStart
+        datetime periodEnd
+        int tokensUsed
+        int tokensAllowance
+        boolean reportedToStripe
+    }
+
+    PlanLimits {
+        string id PK
+        string planName
+        int concurrentScans
+        int teamMembers
+        int scanDurationMinutes
+        int monthlyTokenAllowance
+        json features
+        int monthlyPriceUsd
     }
 ```
 
@@ -594,14 +630,14 @@ graph TB
 graph TD
     E001["Epic 001<br/>Onboarding & Setup<br/>✅ COMPLETE"]
     E002["Epic 002<br/>Security Scans<br/>🔄 IN PROGRESS"]
-    E003["Epic 003<br/>Findings & Remediation<br/>🔄 ALMOST COMPLETE"]
+    E003["Epic 003<br/>Findings & Remediation<br/>✅ COMPLETE"]
     E004["Epic 004<br/>Reporting & Compliance<br/>🔄 IN PROGRESS"]
     E005["Epic 005<br/>Shannon Service<br/>✅ COMPLETE"]
     E006["Epic 006<br/>Container Isolation<br/>🔄 IN PROGRESS"]
     E007["Epic 007<br/>Monorepo Restructure<br/>✅ COMPLETE"]
     E008["Epic 008<br/>Monorepo Testing<br/>✅ COMPLETE"]
     E009["Epic 009<br/>Terraform Infrastructure<br/>✅ COMPLETE"]
-    E010["Epic 010<br/>Billing & Subscriptions<br/>⏳ PLANNED"]
+    E010["Epic 010<br/>Billing & Subscriptions<br/>✅ COMPLETE"]
 
     E001 --> E002
     E002 --> E003
@@ -622,7 +658,7 @@ graph TD
     style E007 fill:#22c55e
     style E008 fill:#22c55e
     style E009 fill:#22c55e
-    style E010 fill:#6b7280
+    style E010 fill:#22c55e
 ```
 
 ---
@@ -662,16 +698,16 @@ graph LR
 
 | Epic | Description | Status | Progress |
 |------|-------------|--------|----------|
-| 001-onboarding-setup | Authentication, organization, team management | ✅ Complete | - |
-| 002-security-scans | Quick scan, authenticated testing, scheduling, CI/CD | 🔄 In Progress | US1-US3 done, US4-US5 pending (104/180 tasks) |
-| 003-findings-remediation | Finding detail, notes, filtering, bulk updates | ✅ Almost Complete | 47/50 tasks (3 polish tasks remaining) |
-| 004-reporting-compliance | Reports, compliance mapping, sharing, scheduling | 🔄 In Progress | US1-US2 done, US3-US6 pending (49/119 tasks) |
-| 005-shannon-service | Shannon REST API service layer | ✅ Complete | 81/81 tasks (all user stories done) |
-| 006-container-isolation | Per-scan container sandboxing | 🔄 In Progress | US1 MVP done, US2-US6 pending (31/103 tasks) |
+| 001-onboarding-setup | Authentication, organization, team management | ✅ Complete | All user stories implemented |
+| 002-security-scans | Quick scan, authenticated testing, scheduling, CI/CD | 🔄 In Progress | US1-US3 done, US4-US5 pending |
+| 003-findings-remediation | Finding detail, notes, filtering, bulk updates | ✅ Complete | All user stories implemented |
+| 004-reporting-compliance | Reports, compliance mapping, sharing, scheduling | 🔄 In Progress | US1-US2 done, US3-US6 pending |
+| 005-shannon-service | Shannon REST API service layer | ✅ Complete | All user stories implemented |
+| 006-container-isolation | Per-scan container sandboxing | 🔄 In Progress | US1 MVP done, US2-US6 pending |
 | 007-monorepo-restructure | Shannon/GhostShell separation, DB rename | ✅ Complete | - |
 | 008-monorepo-testing | Vitest testing infrastructure | ✅ Complete | - |
 | 009-terraform-infrastructure | Terraform AWS infrastructure (multi-env) | ✅ Complete | Networking module + 3 environments |
-| 010-billing | Stripe integration, subscriptions | ⏳ Planned | Not started |
+| 010-billing | Stripe integration, subscriptions, plan limits | ✅ Complete | Checkout, portal, webhooks, plan enforcement |
 
 **Legend:** ✅ Complete | 🔄 In Progress | 📋 Specified | ⏳ Planned
 
@@ -743,12 +779,11 @@ vitest.workspace.ts       # Shared test configuration
 ## Next Steps
 
 ### Immediate Priorities
-1. **Complete Epic 003** - 3 polish tasks remaining (T044, T046, T050)
-2. **Complete Epic 002** - Scheduled Scans (US4: 32 tasks) and CI/CD Integration (US5: 33 tasks)
-3. **Complete Epic 004** - Export/Share (US3), Scheduled Reports (US4), Dashboard (US5), Templates (US6)
+1. **Complete Epic 002** - Scheduled Scans (US4) and CI/CD Integration (US5)
+2. **Complete Epic 004** - Export/Share (US3), Scheduled Reports (US4), Dashboard (US5), Templates (US6)
 
 ### Ready for Implementation
-4. **Complete Epic 006** - Container isolation US2-US6 (resource limits, network isolation, lifecycle, storage, images)
+3. **Complete Epic 006** - Container isolation US2-US6 (resource limits, network isolation, lifecycle, storage, images)
 
-### Future Planning
-5. **Create Epic 010** - Billing & Subscription management (Stripe integration)
+### Completed Recently
+- ✅ **Epic 010 - Billing** - Stripe integration, checkout flow, customer portal, webhooks, plan enforcement

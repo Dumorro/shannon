@@ -165,11 +165,11 @@ Shannon SaaS bridges the gap by:
 **So that** I can evaluate Shannon without significant time investment
 
 **Acceptance Criteria:**
-- [ ] Sign up with Google/GitHub OAuth (<30 seconds)
-- [ ] Add project with just URL (no config required for first scan)
-- [ ] See scan progress in real-time
-- [ ] View at least 3 sample findings within 10 minutes
-- [ ] Download PDF report
+- [x] Sign up with Google/GitHub OAuth (<30 seconds)
+- [x] Add project with just URL (no config required for first scan)
+- [x] See scan progress in real-time
+- [x] View at least 3 sample findings within 10 minutes
+- [x] Download PDF report
 
 **Job-to-be-Done:** *When I'm evaluating security tools, I want to see value quickly so I can decide if it's worth investing more time.*
 
@@ -181,11 +181,11 @@ Shannon SaaS bridges the gap by:
 **So that** everyone has the right level of access
 
 **Acceptance Criteria:**
-- [ ] Send email invitations to unlimited team members
-- [ ] Assign roles: Owner, Admin, Member, Viewer
-- [ ] View pending invitations and resend if needed
-- [ ] Remove members and automatically revoke access
-- [ ] Audit log shows all access changes
+- [x] Send email invitations to unlimited team members
+- [x] Assign roles: Owner, Admin, Member, Viewer
+- [x] View pending invitations and resend if needed
+- [x] Remove members and automatically revoke access
+- [x] Audit log shows all access changes
 
 **Job-to-be-Done:** *When onboarding my team, I want to control who can run scans vs view reports so we maintain security boundaries.*
 
@@ -199,11 +199,11 @@ Shannon SaaS bridges the gap by:
 **So that** I can find vulnerabilities beyond the login page
 
 **Acceptance Criteria:**
-- [ ] Configure authentication via UI form (not YAML)
-- [ ] Support form-based login, API tokens, Basic Auth, SSO
-- [ ] Test TOTP/2FA with secret input
-- [ ] Validate successful authentication before scan starts
-- [ ] See error message if authentication fails (not generic "scan failed")
+- [x] Configure authentication via UI form (not YAML)
+- [x] Support form-based login, API tokens, Basic Auth, SSO
+- [x] Test TOTP/2FA with secret input
+- [x] Validate successful authentication before scan starts
+- [x] See error message if authentication fails (not generic "scan failed")
 
 **Job-to-be-Done:** *When my app requires login, I want Shannon to test authenticated features so I get comprehensive coverage.*
 
@@ -249,9 +249,9 @@ Shannon SaaS bridges the gap by:
 **So that** developers only see actionable vulnerabilities
 
 **Acceptance Criteria:**
-- [ ] Bulk actions: mark as false positive, assign to user, change severity
+- [x] Bulk actions: mark as false positive, assign to user, change severity
 - [ ] Keyboard shortcuts for common actions (j/k navigation, x to mark FP)
-- [ ] Filter by: severity, type, status, assignee, date range
+- [x] Filter by: severity, type, status, assignee, date range
 - [ ] Save custom filter views (e.g., "My open critical findings")
 - [ ] See similar findings from past scans (potential duplicates)
 
@@ -265,10 +265,10 @@ Shannon SaaS bridges the gap by:
 **So that** I don't have to ask the security team for help
 
 **Acceptance Criteria:**
-- [ ] See vulnerable code snippet with line numbers
+- [x] See vulnerable code snippet with line numbers
 - [ ] View suggested fix with side-by-side diff
-- [ ] Copy-paste remediation code
-- [ ] Link to OWASP/CWE documentation for learning
+- [x] Copy-paste remediation code
+- [x] Link to OWASP/CWE documentation for learning
 - [ ] Estimate effort (e.g., "2-4 hours to fix")
 
 **Job-to-be-Done:** *When assigned a security task, I want clear guidance so I can fix it confidently without security expertise.*
@@ -299,11 +299,11 @@ Shannon SaaS bridges the gap by:
 **So that** they trust we take security seriously
 
 **Acceptance Criteria:**
-- [ ] One-click "Generate Executive Report"
-- [ ] Includes: executive summary, risk breakdown, compliance mapping (OWASP Top 10)
-- [ ] Branded PDF with company logo
-- [ ] No technical jargon (explains in business terms)
-- [ ] Shareable public link with expiration (e.g., expires in 7 days)
+- [x] One-click "Generate Executive Report"
+- [x] Includes: executive summary, risk breakdown, compliance mapping (OWASP Top 10)
+- [x] Branded PDF with company logo
+- [x] No technical jargon (explains in business terms)
+- [x] Shareable public link with expiration (e.g., expires in 7 days)
 
 **Job-to-be-Done:** *When communicating with non-technical stakeholders, I want a polished report so they understand our security posture.*
 
@@ -315,9 +315,9 @@ Shannon SaaS bridges the gap by:
 **So that** I can demonstrate coverage for audits
 
 **Acceptance Criteria:**
-- [ ] Automatic mapping to: OWASP Top 10, CWE Top 25, PCI-DSS, SOC2
-- [ ] Filter findings by compliance requirement (e.g., "Show all PCI-DSS issues")
-- [ ] Export compliance report for auditors
+- [x] Automatic mapping to: OWASP Top 10, CWE Top 25, PCI-DSS, SOC2
+- [x] Filter findings by compliance requirement (e.g., "Show all PCI-DSS issues")
+- [x] Export compliance report for auditors
 - [ ] Track remediation status per requirement
 - [ ] Generate "clean report" showing no open critical findings
 
@@ -365,9 +365,9 @@ Shannon SaaS bridges the gap by:
 **So that** I can build custom dashboards and automations
 
 **Acceptance Criteria:**
-- [ ] Generate API key from settings page
-- [ ] Full REST API (OpenAPI spec) for all UI features
-- [ ] Rate limit: 1000 requests/hour
+- [x] Generate API key from settings page
+- [x] Full REST API (OpenAPI spec) for all UI features
+- [x] Rate limit: 1000 requests/hour
 - [ ] Webhooks for: scan.completed, finding.created, finding.resolved
 - [ ] Code examples in docs (cURL, Python, Node.js)
 
