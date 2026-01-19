@@ -1,0 +1,427 @@
+openapi: 3.1.0
+info:
+  title: Shannon Billing API
+  description: |
+    API endpoints for billing and subscription management in Shannon SaaS.
+    All endpoints require authentication via Clerk session.
+  version: 1.0.0
+  contact:
+    name: Shannon Team
+
+servers:
+  - url: /api
+    description: GhostShell API (relative)
+
+tags:
+  - name: Checkout
+    description: Subscription checkout and upgrade flows
+  - name: Portal
+    description: Customer portal access
+  - name: Usage
+    description: Token usage tracking and limits
+  - name: Webhooks
+    description: Stripe webhook handlers
+
+paths:
+  /billing/checkout:
+    post:
+      operationId: createCheckoutSession
+      summary: Create Stripe Checkout session
+      description: |
+        Initiates a checkout session for upgrading to a paid plan.
+        Returns a Stripe checkout URL to redirect the user.
+      tags:
+        - Checkout
+      security:
+        - clerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutRequest'
+      responses:
+        '200':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /billing/portal:
+    post:
+      operationId: createPortalSession
+      summary: Create Stripe Customer Portal session
+      description: |
+        Creates a session for the Stripe Customer Portal where users can
+        manage their subscription, update payment methods, and view invoices.
+      tags:
+        - Portal
+      security:
+        - clerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePortalRequest'
+      responses:
+        '200':
+          description: Portal session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No Stripe customer found for organization
+
+  /org/{orgId}/usage:
+    get:
+      operationId: getOrganizationUsage
+      summary: Get organization token usage
+      description: |
+        Returns current billing period usage statistics including
+        tokens consumed, remaining allowance, and overage information.
+      tags:
+        - Usage
+      security:
+        - clerkSession: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organization ID
+      responses:
+        '200':
+          description: Usage data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Organization not found
+
+  /org/{orgId}/billing:
+    get:
+      operationId: getOrganizationBilling
+      summary: Get organization billing details
+      description: |
+        Returns subscription status, plan details, and billing information
+        for the organization.
+      tags:
+        - Usage
+      security:
+        - clerkSession: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Organization ID
+      responses:
+        '200':
+          description: Billing data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /webhooks/stripe:
+    post:
+      operationId: handleStripeWebhook
+      summary: Handle Stripe webhook events
+      description: |
+        Receives and processes Stripe webhook events for subscription
+        lifecycle management. Verifies webhook signatures.
+      tags:
+        - Webhooks
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe webhook event payload
+      parameters:
+        - name: stripe-signature
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Stripe webhook signature for verification
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+        '400':
+          description: Missing signature or invalid payload
+        '401':
+          description: Invalid webhook signature
+
+components:
+  securitySchemes:
+    clerkSession:
+      type: apiKey
+      in: cookie
+      name: __session
+      description: Clerk session cookie
+
+  schemas:
+    CreateCheckoutRequest:
+      type: object
+      required:
+        - organizationId
+        - priceId
+      properties:
+        organizationId:
+          type: string
+          description: Organization to upgrade
+          example: clk_org_abc123
+        priceId:
+          type: string
+          description: Stripe Price ID for selected plan
+          example: price_1MbPnALkdIwHu7ixQKXfhL3T
+        successUrl:
+          type: string
+          format: uri
+          description: URL to redirect after successful payment
+          example: https://app.shannon.ai/org/abc123/billing?success=true
+        cancelUrl:
+          type: string
+          format: uri
+          description: URL to redirect if checkout is cancelled
+          example: https://app.shannon.ai/org/abc123/billing?cancelled=true
+
+    CheckoutSessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Stripe checkout session ID
+          example: cs_live_a1b2c3d4
+        url:
+          type: string
+          format: uri
+          description: Stripe checkout URL to redirect user
+          example: https://checkout.stripe.com/pay/cs_live_a1b2c3d4
+
+    CreatePortalRequest:
+      type: object
+      required:
+        - organizationId
+      properties:
+        organizationId:
+          type: string
+          description: Organization with active subscription
+          example: clk_org_abc123
+        returnUrl:
+          type: string
+          format: uri
+          description: URL to return to after portal session
+          example: https://app.shannon.ai/org/abc123/billing
+
+    PortalSessionResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Stripe Customer Portal URL
+          example: https://billing.stripe.com/session/abc123
+
+    UsageResponse:
+      type: object
+      properties:
+        current:
+          type: object
+          properties:
+            tokens:
+              type: integer
+              description: Tokens used in current period
+              example: 125000
+            cost:
+              type: number
+              format: float
+              description: Cost in USD
+              example: 0.12
+            percentage:
+              type: integer
+              description: Percentage of allowance used
+              minimum: 0
+              maximum: 100
+              example: 25
+            remaining:
+              type: integer
+              description: Tokens remaining in allowance
+              example: 375000
+        limits:
+          type: object
+          properties:
+            monthly:
+              type: integer
+              description: Monthly token allowance
+              example: 500000
+            planType:
+              type: string
+              enum: [free, pro, enterprise]
+              example: pro
+            hardLimitEnabled:
+              type: boolean
+              description: Whether scans blocked when limit reached
+              example: false
+        overage:
+          type: object
+          properties:
+            tokens:
+              type: integer
+              description: Tokens beyond included allowance
+              example: 0
+            cost:
+              type: number
+              format: float
+              description: Overage cost in USD
+              example: 0.00
+        nextResetDate:
+          type: string
+          format: date-time
+          description: When usage resets (next billing period)
+          example: 2026-02-01T00:00:00Z
+
+    BillingResponse:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [free, pro, enterprise]
+          example: pro
+        subscriptionStatus:
+          type: string
+          enum: [inactive, active, past_due, canceled]
+          example: active
+        currentPeriodEnd:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2026-02-15T00:00:00Z
+        billingEmail:
+          type: string
+          format: email
+          nullable: true
+          example: billing@company.com
+        limits:
+          $ref: '#/components/schemas/PlanLimits'
+        usage:
+          $ref: '#/components/schemas/UsageSummary'
+
+    PlanLimits:
+      type: object
+      properties:
+        concurrentScans:
+          type: integer
+          example: 3
+        teamMembers:
+          type: integer
+          example: 5
+        scanDurationMinutes:
+          type: integer
+          example: 60
+        monthlyTokenAllowance:
+          type: integer
+          example: 500000
+        features:
+          type: object
+          properties:
+            customReports:
+              type: boolean
+            apiAccess:
+              type: boolean
+            scheduledScans:
+              type: boolean
+
+    UsageSummary:
+      type: object
+      properties:
+        scansThisMonth:
+          type: integer
+          example: 12
+        activeScans:
+          type: integer
+          example: 1
+        teamMembers:
+          type: integer
+          example: 3
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code for programmatic handling
+        details:
+          type: object
+          description: Additional error details
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Invalid priceId
+            code: INVALID_PRICE
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Unauthorized
+            code: UNAUTHORIZED
+
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: You do not have access to this organization
+            code: FORBIDDEN
