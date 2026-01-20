@@ -219,7 +219,7 @@ async function main() {
     data: {
       projectId: project.id,
       organizationId: organization.id,
-      status: "completed",
+      status: "COMPLETED",
       startedAt: new Date(Date.now() - 3600000), // 1 hour ago
       completedAt: new Date(),
     },
