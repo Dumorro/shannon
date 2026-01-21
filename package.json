@@ -19,5 +19,10 @@
   },
   "devDependencies": {
     "vitest": "^4.0.17"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "@prisma/engines": "^7.2.0",
+    "prisma": "^7.2.0"
   }
 }

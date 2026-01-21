@@ -5,18 +5,22 @@
 
 import Stripe from "stripe";
 import { db } from "@/lib/db";
+import { getRequiredEnv } from "@/lib/env";
 import type { PlanType, BillingInterval } from "./types";
 
+// Validate and get Stripe secret key
+const stripeSecretKey = getRequiredEnv("STRIPE_SECRET_KEY");
+
 // Initialize Stripe client
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2025-05-28.basil",
   typescript: true,
 });
 
 // Price ID configuration from environment
 export const STRIPE_PRICES = {
-  proMonthly: process.env.STRIPE_PRICE_PRO_MONTHLY!,
-  proAnnual: process.env.STRIPE_PRICE_PRO_ANNUAL!,
+  proMonthly: getRequiredEnv("STRIPE_PRICE_PRO_MONTHLY"),
+  proAnnual: getRequiredEnv("STRIPE_PRICE_PRO_ANNUAL"),
 };
 
 /**

@@ -5,13 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Secondary generator for root project (Shannon service)
-generator serviceClient {
-  provider   = "prisma-client-js"
-  output     = "../../node_modules/.prisma/client"
-  engineType = "binary"
-}
-
 datasource db {
   provider = "postgresql"
 }
