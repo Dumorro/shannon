@@ -10,6 +10,7 @@ import {
   Timer,
   Settings,
   Shield,
+  GitBranch,
 } from "lucide-react";
 import { FindingsBreakdown } from "./findings-breakdown";
 import { ExportButton } from "./export-button";
@@ -22,6 +23,9 @@ interface ScanDetailCardProps {
     status: string;
     source: string;
     targetUrl: string;
+    repositoryUrl?: string | null;
+    repositoryBranch?: string | null;
+    repositoryCommitHash?: string | null;
     currentPhase?: string | null;
     currentAgent?: string | null;
     progressPercent?: number;
@@ -160,6 +164,43 @@ export function ScanDetailCard({ scan }: ScanDetailCardProps) {
 
       {/* Body */}
       <div className="px-6 py-4 space-y-4">
+        {/* Repository information (T049-T051) */}
+        {scan.repositoryUrl && (
+          <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <GitBranch className="h-4 w-4 text-gray-600" />
+              <p className="text-sm font-medium text-gray-700">Source Code Repository</p>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="text-gray-500">URL: </span>
+                <a
+                  href={scan.repositoryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:text-indigo-500 inline-flex items-center gap-1"
+                >
+                  {scan.repositoryUrl}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              {scan.repositoryBranch && (
+                <div>
+                  <span className="text-gray-500">Branch: </span>
+                  <span className="font-mono text-gray-900">{scan.repositoryBranch}</span>
+                </div>
+              )}
+              {scan.repositoryCommitHash && (
+                <div>
+                  <span className="text-gray-500">Commit: </span>
+                  <span className="font-mono text-gray-900">{scan.repositoryCommitHash.substring(0, 7)}</span>
+                  <span className="text-gray-400 ml-1">({scan.repositoryCommitHash})</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Timing info */}
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>

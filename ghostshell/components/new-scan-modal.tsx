@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, Shield, Loader2 } from "lucide-react";
 import { createScan } from "@/lib/actions/scans";
+import { RepositoryInput, type RepositoryInputValue } from "@/components/repository/RepositoryInput";
 
 interface NewScanModalProps {
   isOpen: boolean;
@@ -18,6 +19,11 @@ export function NewScanModal({
 }: NewScanModalProps) {
   const router = useRouter();
   const [targetUrl, setTargetUrl] = useState("");
+  const [repository, setRepository] = useState<RepositoryInputValue>({
+    url: "",
+    branch: "main",
+    commitHash: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +36,9 @@ export function NewScanModal({
       const result = await createScan({
         targetUrl,
         organizationId,
+        repositoryUrl: repository.url || undefined,
+        repositoryBranch: repository.url ? repository.branch : undefined,
+        repositoryCommitHash: repository.commitHash || undefined,
       });
 
       if (result.error) {
@@ -97,6 +106,23 @@ export function NewScanModal({
                 Enter the URL of the application you want to scan for security
                 vulnerabilities.
               </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="repositoryUrl"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Source Code Repository (Optional)
+              </label>
+              <div className="mt-1">
+                <RepositoryInput
+                  value={repository}
+                  onChange={setRepository}
+                  disabled={isSubmitting}
+                  showNote={true}
+                />
+              </div>
             </div>
 
             {error && (

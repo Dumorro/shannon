@@ -115,16 +115,16 @@
 
 ### Scan Configuration UI (US1)
 
-- [ ] T045 [P] [US1] Create RepositoryInput component with URL, branch, commit fields in ghostshell/components/repository/RepositoryInput.tsx
-- [ ] T046 [P] [US1] Create RepositoryValidationIndicator component for async validation feedback in ghostshell/components/repository/ValidationIndicator.tsx
-- [ ] T047 [US1] Integrate RepositoryInput into scan creation form in ghostshell/components/scans/
-- [ ] T048 [US1] Add "entire repository will be scanned" note in UI (per FR-018 clarification)
+- [X] T045 [P] [US1] Create RepositoryInput component with URL, branch, commit fields in ghostshell/components/repository/RepositoryInput.tsx
+- [X] T046 [P] [US1] Create RepositoryValidationIndicator component for async validation feedback in ghostshell/components/repository/ValidationIndicator.tsx
+- [X] T047 [US1] Integrate RepositoryInput into scan creation form in ghostshell/components/scans/
+- [X] T048 [US1] Add "entire repository will be scanned" note in UI (per FR-018 clarification)
 
 ### Scan Details UI (US1)
 
-- [ ] T049 [US1] Display repository URL, branch, and commit hash in scan details page
-- [ ] T050 [US1] Display code snippet with line numbers in finding details view
-- [ ] T051 [US1] Add clickable link to repository (external link icon) in scan details
+- [X] T049 [US1] Display repository URL, branch, and commit hash in scan details page
+- [ ] T050 [US1] Display code snippet with line numbers in finding details view (BLOCKED: depends on T040-T044)
+- [X] T051 [US1] Add clickable link to repository (external link icon) in scan details
 
 **Checkpoint**: User Story 1 complete - scans track repository version with code snippets in findings
 

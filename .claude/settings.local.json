@@ -42,7 +42,20 @@
       "Skill(speckit.tasks)",
       "Skill(speckit.tasks:*)",
       "Bash(./.specify/scripts/bash/check-prerequisites.sh:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(if [ -d \"/Users/dumorro/Documents/Repos/shannon/specs/011-scan-git-repository/checklists\" ])",
+      "Bash(then echo \"EXISTS\")",
+      "Bash(else echo \"NOT_FOUND\")",
+      "Bash(fi)",
+      "Bash(git rev-parse:*)",
+      "Bash(find . -maxdepth 2 -name \".dockerignore\" -exec echo \"Found: {}\" ; -exec cat {} ;)",
+      "Bash(pg_isready:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/ghostshell\" npx prisma migrate:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/ghostshell\" npx prisma migrate resolve:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/ghostshell\" npx prisma migrate dev:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/ghostshell\" npx prisma db push:*)",
+      "Bash([ -d /Users/dumorro/Documents/Repos/shannon/specs/011-scan-git-repository/checklists ])"
     ],
     "deny": [],
     "ask": []
