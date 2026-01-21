@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { ScanHistoryTable } from "./scan-history-table";
 import { ScanFilters, type ScanStatusFilter } from "./scan-filters";
+import { RepositoryFilter, type RepositoryFilterState } from "./RepositoryFilter";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface Scan {
@@ -22,18 +23,24 @@ interface Scan {
   mediumCount: number;
   lowCount: number;
   createdAt: string;
+  // T030: Repository fields
+  repositoryUrl?: string | null;
+  repositoryBranch?: string | null;
+  repositoryCommitHash?: string | null;
 }
 
 interface ScansPageClientProps {
   initialScans: Scan[];
   initialNextCursor: string | null;
   initialTotal: number;
+  organizationId: string; // T058: For RepositoryFilter
 }
 
 export function ScansPageClient({
   initialScans,
   initialNextCursor,
   initialTotal,
+  organizationId,
 }: ScansPageClientProps) {
   const [scans, setScans] = useState<Scan[]>(initialScans);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
@@ -44,14 +51,18 @@ export function ScansPageClient({
     dateFrom?: string;
     dateTo?: string;
   }>({ status: [] });
+  // T058: Repository filter state
+  const [repositoryFilters, setRepositoryFilters] = useState<RepositoryFilterState>({});
 
   const fetchScans = useCallback(async (
     cursor?: string,
-    newFilters?: typeof filters
+    newFilters?: typeof filters,
+    newRepoFilters?: RepositoryFilterState
   ) => {
     setIsLoading(true);
     try {
       const currentFilters = newFilters || filters;
+      const currentRepoFilters = newRepoFilters || repositoryFilters;
       const params = new URLSearchParams();
 
       if (currentFilters.status.length > 0) {
@@ -62,6 +73,13 @@ export function ScansPageClient({
       }
       if (currentFilters.dateTo) {
         params.set("endDate", currentFilters.dateTo);
+      }
+      // T052-T053: Add repository filters
+      if (currentRepoFilters.repositoryUrl) {
+        params.set("repositoryUrl", currentRepoFilters.repositoryUrl);
+      }
+      if (currentRepoFilters.repositoryBranch) {
+        params.set("repositoryBranch", currentRepoFilters.repositoryBranch);
       }
       if (cursor) {
         params.set("cursor", cursor);
@@ -89,12 +107,19 @@ export function ScansPageClient({
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, repositoryFilters]);
 
   const handleFilterChange = useCallback((newFilters: typeof filters) => {
     setFilters(newFilters);
     // Fetch with new filters, reset pagination
     fetchScans(undefined, newFilters);
+  }, [fetchScans]);
+
+  // T058: Repository filter handler
+  const handleRepositoryFilterChange = useCallback((newRepoFilters: RepositoryFilterState) => {
+    setRepositoryFilters(newRepoFilters);
+    // Fetch with new repository filters, reset pagination
+    fetchScans(undefined, undefined, newRepoFilters);
   }, [fetchScans]);
 
   const handleLoadMore = useCallback(async () => {
@@ -122,12 +147,21 @@ export function ScansPageClient({
       </div>
 
       {/* Filters */}
-      <ScanFilters
-        onFilterChange={handleFilterChange}
-        initialStatus={filters.status}
-        initialDateFrom={filters.dateFrom}
-        initialDateTo={filters.dateTo}
-      />
+      <div className="space-y-4">
+        <ScanFilters
+          onFilterChange={handleFilterChange}
+          initialStatus={filters.status}
+          initialDateFrom={filters.dateFrom}
+          initialDateTo={filters.dateTo}
+        />
+        {/* T058: Repository filter */}
+        <RepositoryFilter
+          onFilterChange={handleRepositoryFilterChange}
+          initialRepositoryUrl={repositoryFilters.repositoryUrl}
+          initialRepositoryBranch={repositoryFilters.repositoryBranch}
+          organizationId={organizationId}
+        />
+      </div>
 
       {/* Scans table */}
       <ScanHistoryTable

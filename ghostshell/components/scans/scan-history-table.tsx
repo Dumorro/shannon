@@ -10,6 +10,7 @@ import {
   Timer,
   ChevronRight,
   Filter,
+  GitBranch,
 } from "lucide-react";
 
 interface Scan {
@@ -27,6 +28,10 @@ interface Scan {
   mediumCount: number;
   lowCount: number;
   createdAt: string;
+  // T059: Repository fields for branch badge
+  repositoryUrl?: string | null;
+  repositoryBranch?: string | null;
+  repositoryCommitHash?: string | null;
 }
 
 interface ScanHistoryTableProps {
@@ -172,9 +177,18 @@ export function ScanHistoryTable({
 
               return (
                 <tr key={scan.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {scan.projectName}
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="text-sm font-medium text-gray-900">
+                        {scan.projectName}
+                      </div>
+                      {/* T059: Branch badge */}
+                      {scan.repositoryBranch && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <GitBranch className="h-3 w-3" />
+                          <span className="font-mono">{scan.repositoryBranch}</span>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
