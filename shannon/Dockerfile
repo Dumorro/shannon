@@ -113,8 +113,8 @@ COPY package*.json ./
 COPY mcp-server/package*.json ./mcp-server/
 
 # Install Node.js dependencies (including devDependencies for TypeScript build)
-RUN npm ci && \
-    cd mcp-server && npm ci && cd .. && \
+RUN npm install && \
+    cd mcp-server && npm install && cd .. && \
     npm cache clean --force
 
 # Copy application source code

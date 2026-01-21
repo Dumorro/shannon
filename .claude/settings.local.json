@@ -19,7 +19,21 @@
       "Bash(powershell.exe -ExecutionPolicy Bypass -File \"c:/dev/code/shannon/.speckit/scripts/powershell/setup-plan.ps1\" -Json)",
       "Bash(powershell.exe -ExecutionPolicy Bypass -File \"c:/dev/code/shannon/.specify/scripts/powershell/update-agent-context.ps1\" -AgentType claude)",
       "Bash(powershell.exe -ExecutionPolicy Bypass -File \"c:/dev/code/shannon/.speckit/scripts/powershell/check-prerequisites.ps1\" -Json)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat\\(infrastructure\\): implement Terraform infrastructure for AWS\n\nImplement Phases 1-4 of Terraform infrastructure deployment:\n\nPhase 1 - Setup:\n- Add .terraform-version \\(1.6.0\\) and .tflint.hcl configuration\n- Add infrastructure README with project documentation\n- Update .gitignore with Terraform patterns\n\nPhase 2 - Bootstrap:\n- Create bootstrap module for S3 state bucket and DynamoDB lock table\n- Configure encryption, versioning, and public access blocking\n\nPhase 3 - Networking Module + Dev Environment:\n- Implement networking module with VPC, subnets, gateways, route tables\n- Add security groups for ALB, app servers, and databases\n- Create dev environment with module composition\n\nPhase 4 - Staging + Production Environments:\n- Add staging environment \\(t3.small, single NAT, 10.1.0.0/16\\)\n- Add production environment \\(t3.medium, multi-AZ NAT, 3 AZs, 10.2.0.0/16\\)\n\nAlso updates spec.md with 5 additional clarifications and marks 33 tasks\ncomplete in tasks.md.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat\\(infrastructure\\): implement Terraform infrastructure for AWS\n\nImplement Phases 1-4 of Terraform infrastructure deployment:\n\nPhase 1 - Setup:\n- Add .terraform-version \\(1.6.0\\) and .tflint.hcl configuration\n- Add infrastructure README with project documentation\n- Update .gitignore with Terraform patterns\n\nPhase 2 - Bootstrap:\n- Create bootstrap module for S3 state bucket and DynamoDB lock table\n- Configure encryption, versioning, and public access blocking\n\nPhase 3 - Networking Module + Dev Environment:\n- Implement networking module with VPC, subnets, gateways, route tables\n- Add security groups for ALB, app servers, and databases\n- Create dev environment with module composition\n\nPhase 4 - Staging + Production Environments:\n- Add staging environment \\(t3.small, single NAT, 10.1.0.0/16\\)\n- Add production environment \\(t3.medium, multi-AZ NAT, 3 AZs, 10.2.0.0/16\\)\n\nAlso updates spec.md with 5 additional clarifications and marks 33 tasks\ncomplete in tasks.md.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(npm run dev:ghostshell:*)",
+      "Bash(npm run dev:shannon:*)",
+      "Bash(export N_PREFIX=$HOME/.n)",
+      "Bash(export PATH=$N_PREFIX/bin:$PATH)",
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(pkill:*)",
+      "Bash(export DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/ghostshell\")",
+      "Bash(npx --prefix ghostshell prisma generate:*)",
+      "Bash(npm run dev:*)",
+      "Bash(docker compose:*)",
+      "Bash(PGPASSWORD=postgres psql:*)"
     ],
     "deny": [],
     "ask": []
