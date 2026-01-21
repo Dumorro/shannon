@@ -107,11 +107,13 @@
 
 ### Code Snippet Integration (US1)
 
-- [ ] T040 [US1] Implement extractCodeSnippet function call during finding generation in shannon/src/ai/claude-executor.ts
-- [ ] T041 [US1] Add codeLocation field to Finding.evidence JSON structure in finding generation
-- [ ] T042 [US1] Handle binary file edge case (skip snippet extraction) in snippet.ts
-- [ ] T043 [US1] Handle large file edge case (>10MB, skip snippet) in snippet.ts
-- [ ] T044 [US1] Handle UTF-8 encoding errors gracefully in snippet.ts
+- [ ] T040 [US1] Implement extractCodeSnippet function call during finding generation in shannon/src/ai/claude-executor.ts (BLOCKED: needs finding import architecture)
+- [ ] T041 [US1] Add codeLocation field to Finding.evidence JSON structure in finding generation (BLOCKED: needs finding import architecture)
+- [X] T042 [US1] Handle binary file edge case (skip snippet extraction) in snippet-processor.ts
+- [X] T043 [US1] Handle large file edge case (>10MB, skip snippet) in snippet-processor.ts
+- [X] T044 [US1] Handle UTF-8 encoding errors gracefully in snippet-processor.ts
+
+**Note**: T040-T041 are blocked pending architecture decision on finding import mechanism. The snippet extraction utility is implemented and tested, but integration requires a finding import flow that doesn't currently exist. Deliverables: shannon/src/utils/snippet-processor.ts (ready for future integration).
 
 ### Scan Configuration UI (US1)
 
