@@ -81,26 +81,26 @@
 
 ### Repository Credentials API (US1)
 
-- [ ] T023 [P] [US1] Create POST /api/repository-credentials route for credential creation in ghostshell/app/api/repository-credentials/route.ts
-- [ ] T024 [P] [US1] Create GET /api/repository-credentials route to list credentials (without decrypted secrets) in ghostshell/app/api/repository-credentials/route.ts
-- [ ] T025 [US1] Create GET /api/repository-credentials/[id]/route.ts for single credential fetch
-- [ ] T026 [US1] Create PATCH /api/repository-credentials/[id]/route.ts for credential update
-- [ ] T027 [US1] Create DELETE /api/repository-credentials/[id]/route.ts for credential removal
-- [ ] T028 [US1] Create POST /api/repository-credentials/validate/route.ts for testing repository access (returns valid/error type)
+- [X] T023 [P] [US1] Create POST /api/repository-credentials route for credential creation in ghostshell/app/api/repository-credentials/route.ts
+- [X] T024 [P] [US1] Create GET /api/repository-credentials route to list credentials (without decrypted secrets) in ghostshell/app/api/repository-credentials/route.ts
+- [X] T025 [US1] Create GET /api/repository-credentials/[id]/route.ts for single credential fetch
+- [X] T026 [US1] Create PATCH /api/repository-credentials/[id]/route.ts for credential update
+- [X] T027 [US1] Create DELETE /api/repository-credentials/[id]/route.ts for credential removal
+- [X] T028 [US1] Create POST /api/repository-credentials/validate/route.ts for testing repository access (returns valid/error type)
 
 ### Scan API Extensions (US1)
 
-- [ ] T029 [US1] Extend POST /api/scans to accept repositoryUrl, repositoryBranch, repositoryCommitHash in existing scan creation route
-- [ ] T030 [US1] Extend GET /api/scans/[id] to return repository fields in scan detail response
-- [ ] T031 [US1] Add logic to inherit defaultRepositoryUrl/Branch from Project when not provided in scan creation
-- [ ] T032 [US1] Add credential snapshot logic - resolve and cache credential at scan creation time (per clarification)
+- [X] T029 [US1] Extend POST /api/scans to accept repositoryUrl, repositoryBranch, repositoryCommitHash in existing scan creation route
+- [X] T030 [US1] Extend GET /api/scans/[id] to return repository fields in scan detail response
+- [X] T031 [US1] Add logic to inherit defaultRepositoryUrl/Branch from Project when not provided in scan creation
+- [X] T032 [US1] Add credential snapshot logic - resolve and cache credential at scan creation time (per clarification)
 
 ### Shannon Temporal Integration (US1)
 
-- [ ] T033 [US1] Create cloneRepository activity that receives pre-resolved credential in shannon/src/temporal/activities.ts
-- [ ] T034 [US1] Add shallow clone with --depth 1 for performance in cloneRepository activity
-- [ ] T035 [US1] Add commit hash resolution (git rev-parse HEAD) when only branch provided in shannon/src/temporal/activities.ts
-- [ ] T036 [US1] Create cleanupRepository activity to delete cloned repo (within 5 min per SC-008) in shannon/src/temporal/activities.ts
+- [X] T033 [US1] Create cloneRepository activity that receives pre-resolved credential in shannon/src/temporal/activities.ts
+- [X] T034 [US1] Add shallow clone with --depth 1 for performance in cloneRepository activity
+- [X] T035 [US1] Add commit hash resolution (git rev-parse HEAD) when only branch provided in shannon/src/temporal/activities.ts
+- [X] T036 [US1] Create cleanupRepository activity to delete cloned repo (within 5 min per SC-008) in shannon/src/temporal/activities.ts
 - [ ] T037 [US1] Extend pentestPipelineWorkflow to call cloneRepository at scan start in shannon/src/temporal/workflows.ts
 - [ ] T038 [US1] Extend pentestPipelineWorkflow to call cleanupRepository after scan completion (including failures) in shannon/src/temporal/workflows.ts
 - [ ] T039 [US1] Pass repository path to Claude executor for code context in shannon/src/ai/claude-executor.ts

@@ -12,6 +12,13 @@ export interface PipelineInput {
   scanId?: string; // Database scan ID for web application integration
   organizationId?: string; // Organization ID for multi-tenant isolation
 
+  // Git repository tracking (Epic 011)
+  repositoryUrl?: string; // Git repository URL (HTTPS or SSH)
+  repositoryBranch?: string; // Branch to scan (default: main)
+  repositoryCommitHash?: string; // Specific commit hash (optional)
+  repositoryCredential?: string; // Decrypted credential (PAT or SSH key)
+  repositoryCredentialType?: 'PAT' | 'SSH'; // Credential type
+
   // Container isolation settings (Epic 006)
   containerIsolationEnabled?: boolean | undefined; // Enable container isolation for this scan
   planId?: string | undefined; // Subscription plan for resource limits (free, pro, enterprise)

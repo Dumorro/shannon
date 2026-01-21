@@ -635,3 +635,290 @@ export async function terminateScanContainer(
     clearInterval(heartbeatInterval);
   }
 }
+
+/**
+ * Clone Repository Activity (T033-T035)
+ *
+ * Clones a git repository with PAT or SSH authentication.
+ * - Shallow clone with --depth 1 for performance (T034)
+ * - Resolves commit hash from HEAD (T035)
+ * - Uses pre-resolved credential passed from scan creation (T032)
+ */
+export async function cloneRepositoryActivity(input: {
+  repositoryUrl: string;
+  repositoryBranch?: string;
+  repositoryCommitHash?: string;
+  credential: string;
+  credentialType: 'PAT' | 'SSH';
+  targetDir: string;
+}): Promise<{
+  success: boolean;
+  repoPath?: string;
+  commitHash?: string;
+  branch?: string;
+  error?: string;
+  durationMs: number;
+}> {
+  const startTime = Date.now();
+  const heartbeatInterval = setInterval(() => heartbeat(), HEARTBEAT_INTERVAL_MS);
+
+  try {
+    const simpleGit = (await import('simple-git')).default;
+    const fs = await import('fs/promises');
+    const os = await import('os');
+    const path = await import('path');
+
+    const { repositoryUrl, repositoryBranch, credential, credentialType, targetDir } = input;
+
+    console.log(chalk.blue(`🔄 Cloning repository: ${repositoryUrl}`));
+
+    // Validate inputs
+    if (!repositoryUrl) {
+      throw ApplicationFailure.create({
+        message: 'Repository URL is required',
+        type: 'VALIDATION_ERROR',
+        nonRetryable: true,
+      });
+    }
+
+    if (!credential) {
+      throw ApplicationFailure.create({
+        message: 'Repository credential is required',
+        type: 'VALIDATION_ERROR',
+        nonRetryable: true,
+      });
+    }
+
+    // Create target directory
+    await fs.mkdir(targetDir, { recursive: true });
+
+    let authenticatedUrl: string;
+    let gitOptions: any;
+    let sshKeyPath: string | undefined;
+
+    if (credentialType === 'PAT') {
+      // PAT authentication: inject token into HTTPS URL
+      if (!repositoryUrl.startsWith('https://')) {
+        throw ApplicationFailure.create({
+          message: 'PAT authentication requires HTTPS URL',
+          type: 'VALIDATION_ERROR',
+          nonRetryable: true,
+        });
+      }
+
+      authenticatedUrl = repositoryUrl.replace(
+        'https://',
+        `https://x-access-token:${credential}@`
+      );
+
+      gitOptions = {
+        baseDir: path.dirname(targetDir),
+        binary: 'git',
+        maxConcurrentProcesses: 1,
+        timeout: { block: 5 * 60 * 1000 }, // 5 minutes
+      };
+    } else {
+      // SSH authentication: write key to temporary file
+      if (!repositoryUrl.startsWith('git@')) {
+        throw ApplicationFailure.create({
+          message: 'SSH authentication requires SSH URL',
+          type: 'VALIDATION_ERROR',
+          nonRetryable: true,
+        });
+      }
+
+      const tmpDir = os.tmpdir();
+      sshKeyPath = path.join(tmpDir, `ssh-key-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      await fs.writeFile(sshKeyPath, credential, { mode: 0o600 });
+
+      authenticatedUrl = repositoryUrl;
+
+      const sshCommand = `ssh -i ${sshKeyPath} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10`;
+
+      gitOptions = {
+        baseDir: path.dirname(targetDir),
+        binary: 'git',
+        maxConcurrentProcesses: 1,
+        timeout: { block: 5 * 60 * 1000 },
+        config: [`core.sshCommand=${sshCommand}`],
+      };
+    }
+
+    const git = simpleGit(gitOptions);
+
+    // T034: Shallow clone with --depth 1 for performance
+    const cloneArgs: string[] = ['--depth', '1'];
+    if (repositoryBranch) {
+      cloneArgs.push('--branch', repositoryBranch);
+    }
+
+    await git.clone(authenticatedUrl, targetDir, cloneArgs);
+
+    // T035: Resolve commit hash from HEAD
+    const repoGit = simpleGit(targetDir);
+    const log = await repoGit.log({ maxCount: 1 });
+    const commitHash = log.latest?.hash;
+
+    // Get current branch
+    const branchSummary = await repoGit.branch();
+    const currentBranch = branchSummary.current;
+
+    // Clean up SSH key if used
+    if (sshKeyPath) {
+      try {
+        await fs.unlink(sshKeyPath);
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
+
+    const durationMs = Date.now() - startTime;
+    console.log(chalk.green(`✅ Repository cloned successfully in ${durationMs}ms`));
+
+    return {
+      success: true,
+      repoPath: targetDir,
+      commitHash,
+      branch: currentBranch,
+      durationMs,
+    };
+  } catch (error) {
+    const durationMs = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown clone error';
+
+    console.error(chalk.red(`❌ Repository clone failed: ${errorMessage}`));
+
+    // Classify errors for retry behavior
+    if (
+      errorMessage.includes('Authentication failed') ||
+      errorMessage.includes('Permission denied') ||
+      errorMessage.includes('invalid credentials')
+    ) {
+      throw ApplicationFailure.create({
+        message: truncateErrorMessage(`Repository authentication failed: ${errorMessage}`),
+        type: 'AUTH_FAILED',
+        nonRetryable: true, // Don't retry auth failures
+      });
+    }
+
+    if (
+      errorMessage.includes('not found') ||
+      errorMessage.includes('does not exist') ||
+      errorMessage.includes('Could not resolve')
+    ) {
+      throw ApplicationFailure.create({
+        message: truncateErrorMessage(`Repository not found: ${errorMessage}`),
+        type: 'NOT_FOUND',
+        nonRetryable: true, // Don't retry not found errors
+      });
+    }
+
+    if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+      throw ApplicationFailure.create({
+        message: truncateErrorMessage(`Repository clone timed out: ${errorMessage}`),
+        type: 'CLONE_TIMEOUT',
+        nonRetryable: false, // Retry timeouts
+      });
+    }
+
+    // Network errors are retryable
+    if (
+      errorMessage.includes('network') ||
+      errorMessage.includes('connection') ||
+      errorMessage.includes('DNS') ||
+      errorMessage.includes('ENOTFOUND')
+    ) {
+      throw ApplicationFailure.create({
+        message: truncateErrorMessage(`Network error during clone: ${errorMessage}`),
+        type: 'NETWORK_ERROR',
+        nonRetryable: false, // Retry network errors
+      });
+    }
+
+    // Unknown errors are retryable
+    throw ApplicationFailure.create({
+      message: truncateErrorMessage(`Repository clone failed: ${errorMessage}`),
+      type: 'CLONE_FAILED',
+      nonRetryable: false,
+    });
+  } finally {
+    clearInterval(heartbeatInterval);
+  }
+}
+
+/**
+ * Cleanup Repository Activity (T036)
+ *
+ * Deletes the cloned repository directory.
+ * Called after scan completion (including failures) to free up disk space.
+ */
+export async function cleanupRepositoryActivity(input: {
+  repoPath: string;
+}): Promise<{
+  success: boolean;
+  deletedPath?: string;
+  error?: string;
+  durationMs: number;
+}> {
+  const startTime = Date.now();
+  const heartbeatInterval = setInterval(() => heartbeat(), HEARTBEAT_INTERVAL_MS);
+
+  try {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+
+    const { repoPath } = input;
+
+    if (!repoPath) {
+      return {
+        success: true, // No path to clean up
+        durationMs: Date.now() - startTime,
+      };
+    }
+
+    console.log(chalk.blue(`🧹 Cleaning up repository: ${repoPath}`));
+
+    // Safety check: only delete from /tmp/, /temp/, scan-repos, or cloned-repos paths
+    const absolutePath = path.resolve(repoPath);
+    const isSafePath =
+      absolutePath.includes('/tmp/') ||
+      absolutePath.includes('/temp/') ||
+      absolutePath.includes('scan-repos') ||
+      absolutePath.includes('cloned-repos');
+
+    if (!isSafePath) {
+      console.warn(chalk.yellow(`⚠️  Skipping cleanup of non-temporary path: ${absolutePath}`));
+      return {
+        success: false,
+        error: 'Path is not in a temporary directory',
+        durationMs: Date.now() - startTime,
+      };
+    }
+
+    // Recursively delete directory
+    await fs.rm(absolutePath, { recursive: true, force: true });
+
+    const durationMs = Date.now() - startTime;
+    console.log(chalk.green(`✅ Repository cleaned up in ${durationMs}ms`));
+
+    return {
+      success: true,
+      deletedPath: absolutePath,
+      durationMs,
+    };
+  } catch (error) {
+    const durationMs = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown cleanup error';
+
+    console.error(chalk.red(`❌ Repository cleanup failed: ${errorMessage}`));
+
+    // Cleanup failures are not critical - return success with error message
+    return {
+      success: false,
+      error: errorMessage,
+      durationMs,
+    };
+  } finally {
+    clearInterval(heartbeatInterval);
+  }
+}

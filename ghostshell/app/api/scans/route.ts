@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { startScanWorkflow } from "@/lib/temporal/client";
 import { checkConcurrentLimit } from "@/lib/scan-queue";
+import { decryptCredential } from "@/lib/git/encryption";
+import { normalizeRepoUrl } from "@/lib/git/normalize";
 import type { ScanStatus } from "@prisma/client";
 
 /**
@@ -130,7 +132,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { projectId, targetUrl: targetUrlOverride } = body;
+    const {
+      projectId,
+      targetUrl: targetUrlOverride,
+      repositoryUrl: repositoryUrlOverride,
+      repositoryBranch: repositoryBranchOverride,
+      repositoryCommitHash,
+    } = body;
 
     if (!projectId) {
       return NextResponse.json(
@@ -153,6 +161,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Repository configuration (T031: inherit from project defaults)
+    const repositoryUrl = repositoryUrlOverride || project.defaultRepositoryUrl;
+    const repositoryBranch = repositoryBranchOverride || project.defaultRepositoryBranch || "main";
+
+    // T032: Credential snapshot - resolve and cache credential at scan creation time
+    let decryptedCredential: string | undefined;
+    let credentialType: "PAT" | "SSH" | undefined;
+
+    if (repositoryUrl) {
+      // Normalize repository URL for lookup
+      const normalizedUrl = normalizeRepoUrl(repositoryUrl);
+
+      // Fetch credential from database
+      const credential = await db.repositoryCredentials.findFirst({
+        where: {
+          organizationId: orgId,
+          repositoryUrl: normalizedUrl,
+        },
+      });
+
+      if (credential) {
+        // Decrypt credential at scan creation time (snapshot)
+        decryptedCredential = decryptCredential(credential.encryptedCredential, orgId);
+        credentialType = credential.credentialType;
+      } else {
+        // No credential found - proceed without repository cloning
+        console.warn(`No credential found for repository: ${normalizedUrl}`);
+      }
+    }
+
     // Check concurrent scan limit
     const { canStart, currentCount, limit: concurrentLimit } = await checkConcurrentLimit(orgId);
     if (!canStart) {
@@ -168,7 +206,7 @@ export async function POST(request: NextRequest) {
 
     const targetUrl = targetUrlOverride || project.targetUrl;
 
-    // Create scan record
+    // Create scan record (T029: store repository fields)
     const scan = await db.$transaction(async (tx) => {
       const newScan = await tx.scan.create({
         data: {
@@ -176,6 +214,9 @@ export async function POST(request: NextRequest) {
           projectId: project.id,
           status: "PENDING",
           source: "MANUAL",
+          repositoryUrl,
+          repositoryBranch,
+          repositoryCommitHash,
         },
       });
 
@@ -190,6 +231,9 @@ export async function POST(request: NextRequest) {
             projectId: project.id,
             projectName: project.name,
             targetUrl,
+            repositoryUrl,
+            repositoryBranch,
+            repositoryCommitHash,
           },
         },
       });
@@ -197,13 +241,17 @@ export async function POST(request: NextRequest) {
       return newScan;
     });
 
-    // Start Temporal workflow
+    // Start Temporal workflow (T032: pass credential snapshot)
     try {
       const { workflowId } = await startScanWorkflow({
         projectId: project.id,
         organizationId: orgId,
         targetUrl,
-        repositoryUrl: project.repositoryUrl || undefined,
+        repositoryUrl,
+        repositoryBranch,
+        repositoryCommitHash,
+        repositoryCredential: decryptedCredential,
+        repositoryCredentialType: credentialType,
         scanId: scan.id,
       });
 
