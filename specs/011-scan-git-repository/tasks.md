@@ -26,9 +26,9 @@
 
 **Purpose**: Project initialization and dependencies
 
-- [ ] T001 Install simple-git dependency in ghostshell/package.json
-- [ ] T002 [P] Create git operations directory structure at ghostshell/lib/git/
-- [ ] T003 [P] Create repository components directory at ghostshell/components/repository/
+- [X] T001 Install simple-git dependency in ghostshell/package.json
+- [X] T002 [P] Create git operations directory structure at ghostshell/lib/git/
+- [X] T003 [P] Create repository components directory at ghostshell/components/repository/
 
 ---
 
@@ -40,34 +40,34 @@
 
 ### Database Schema
 
-- [ ] T004 Add CredentialType enum (PAT, SSH) to ghostshell/prisma/schema.prisma
-- [ ] T005 Add repository fields (repositoryUrl, repositoryBranch, repositoryCommitHash) to Scan model in ghostshell/prisma/schema.prisma
-- [ ] T006 Add RepositoryCredentials model with unique constraint [organizationId, repositoryUrl] in ghostshell/prisma/schema.prisma
-- [ ] T007 Add default repository fields (defaultRepositoryUrl, defaultRepositoryBranch) to Project model in ghostshell/prisma/schema.prisma
-- [ ] T008 Add Organization relation to RepositoryCredentials model in ghostshell/prisma/schema.prisma
-- [ ] T009 Run Prisma migration: `npx prisma migrate dev --name add_repository_tracking`
+- [X] T004 Add CredentialType enum (PAT, SSH) to ghostshell/prisma/schema.prisma
+- [X] T005 Add repository fields (repositoryUrl, repositoryBranch, repositoryCommitHash) to Scan model in ghostshell/prisma/schema.prisma
+- [X] T006 Add RepositoryCredentials model with unique constraint [organizationId, repositoryUrl] in ghostshell/prisma/schema.prisma
+- [X] T007 Add default repository fields (defaultRepositoryUrl, defaultRepositoryBranch) to Project model in ghostshell/prisma/schema.prisma
+- [X] T008 Add Organization relation to RepositoryCredentials model in ghostshell/prisma/schema.prisma
+- [X] T009 Run Prisma migration: `npx prisma migrate dev --name add_repository_tracking` (applied via db push)
 
 ### Git Operations Library
 
-- [ ] T010 [P] Create repository URL validation utilities (HTTPS and SSH formats) in ghostshell/lib/git/validation.ts
-- [ ] T011 [P] Create repository URL normalization function (remove .git suffix, trailing slash) in ghostshell/lib/git/normalize.ts
-- [ ] T012 Implement git clone with PAT authentication (inject token into HTTPS URL) in ghostshell/lib/git/clone.ts
-- [ ] T013 Implement git clone with SSH key authentication (GIT_SSH_COMMAND) in ghostshell/lib/git/clone.ts
-- [ ] T014 [P] Implement repository cleanup function (delete cloned directory) in ghostshell/lib/git/cleanup.ts
-- [ ] T015 [P] Implement code snippet extraction (5 lines context, handle binary/large files) in ghostshell/lib/git/snippet.ts
-- [ ] T016 Implement git ls-remote for repository validation (10s timeout per SC-003) in ghostshell/lib/git/validate-access.ts
-- [ ] T017 Implement repository size estimation using git ls-remote in ghostshell/lib/git/validate-access.ts
-- [ ] T018 Add 5GB size limit validation with clear error message (FR-017) in ghostshell/lib/git/validate-access.ts
+- [X] T010 [P] Create repository URL validation utilities (HTTPS and SSH formats) in ghostshell/lib/git/validation.ts
+- [X] T011 [P] Create repository URL normalization function (remove .git suffix, trailing slash) in ghostshell/lib/git/normalize.ts
+- [X] T012 Implement git clone with PAT authentication (inject token into HTTPS URL) in ghostshell/lib/git/clone.ts
+- [X] T013 Implement git clone with SSH key authentication (GIT_SSH_COMMAND) in ghostshell/lib/git/clone.ts
+- [X] T014 [P] Implement repository cleanup function (delete cloned directory) in ghostshell/lib/git/cleanup.ts
+- [X] T015 [P] Implement code snippet extraction (5 lines context, handle binary/large files) in ghostshell/lib/git/snippet.ts
+- [X] T016 Implement git ls-remote for repository validation (10s timeout per SC-003) in ghostshell/lib/git/validate-access.ts
+- [X] T017 Implement repository size estimation using git ls-remote in ghostshell/lib/git/validate-access.ts
+- [X] T018 Add 5GB size limit validation with clear error message (FR-017) in ghostshell/lib/git/validate-access.ts
 
 ### Credential Encryption
 
-- [ ] T019 Create credential encryption/decryption functions reusing existing AES-256-GCM infrastructure in ghostshell/lib/git/encryption.ts
+- [X] T019 Create credential encryption/decryption functions reusing existing AES-256-GCM infrastructure in ghostshell/lib/git/encryption.ts
 
 ### TypeScript Types
 
-- [ ] T020 [P] Create CodeLocation interface and FindingEvidence type extension in ghostshell/lib/types/repository.ts
-- [ ] T021 [P] Create RepositoryValidationResult interface in ghostshell/lib/types/repository.ts
-- [ ] T022 [P] Create CreateCredentialInput and CreateScanInput interfaces in ghostshell/lib/types/repository.ts
+- [X] T020 [P] Create CodeLocation interface and FindingEvidence type extension in ghostshell/lib/types/repository.ts
+- [X] T021 [P] Create RepositoryValidationResult interface in ghostshell/lib/types/repository.ts
+- [X] T022 [P] Create CreateCredentialInput and CreateScanInput interfaces in ghostshell/lib/types/repository.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 

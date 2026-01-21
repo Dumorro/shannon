@@ -69,6 +69,9 @@ model Organization {
   billingEvents BillingEvent[]
   usageRecords  UsageRecord[]
 
+  // Git Repository Tracking relations (Epic 011)
+  repositoryCredentials RepositoryCredentials[]
+
   @@index([deletedAt])
   @@index([plan])
   @@index([createdAt])
@@ -192,6 +195,12 @@ model ServiceReportJob {
 // Security Scans Feature
 // ===================
 
+// Credential type enum (Epic 011)
+enum CredentialType {
+  PAT // Personal Access Token (HTTPS repositories)
+  SSH // SSH private key (SSH repositories)
+}
+
 // Project - target application configured for security testing
 model Project {
   id             String   @id @default(cuid())
@@ -199,9 +208,14 @@ model Project {
   name           String
   description    String?
   targetUrl      String // Base URL for scanning
-  repositoryUrl  String? // Optional: linked source code repo
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  repositoryUrl  String? // Optional: linked source code repo (deprecated, use defaultRepositoryUrl)
+
+  // Git Repository Defaults (Epic 011)
+  defaultRepositoryUrl    String? // Default repository URL for scans
+  defaultRepositoryBranch String? // Default branch to scan (e.g., 'main', 'develop')
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   organization         Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   scans                Scan[]
@@ -266,6 +280,11 @@ model Scan {
   errorMessage String?
   errorCode    String?
 
+  // Git Repository Tracking (Epic 011)
+  repositoryUrl        String? // Git repository URL (HTTPS or SSH format)
+  repositoryBranch     String? // Branch name that was scanned
+  repositoryCommitHash String? // Exact commit SHA-1 hash (40 chars)
+
   // Metadata
   metadata  Json?
   createdAt DateTime @default(now())
@@ -297,6 +316,8 @@ model Scan {
   @@index([organizationId, status])
   @@index([parentScanId])
   @@index([apiKeyId])
+  @@index([repositoryUrl])
+  @@index([organizationId, repositoryUrl])
 }
 
 // ScanResult - detailed results from completed scan
@@ -407,6 +428,34 @@ model AuthenticationConfig {
   updatedAt DateTime @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// RepositoryCredentials - Secure storage for git authentication (Epic 011)
+model RepositoryCredentials {
+  id             String         @id @default(cuid())
+  organizationId String
+  repositoryUrl  String         // Normalized repository URL (without .git suffix)
+  credentialType CredentialType
+
+  // Encrypted credentials (AES-256-GCM with org-derived key)
+  encryptedCredential String // Encrypted PAT token or SSH private key
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String   // User ID who created the credential
+
+  // Validation tracking
+  lastValidatedAt  DateTime?
+  validationStatus String? // 'valid', 'invalid', 'untested'
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([organizationId, repositoryUrl])
+  @@index([organizationId])
+  @@index([repositoryUrl])
 }
 
 // ===================
