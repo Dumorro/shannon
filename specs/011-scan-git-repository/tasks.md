@@ -140,20 +140,20 @@
 
 ### Scan Filtering API (US2)
 
-- [ ] T052 [US2] Extend GET /api/scans to support filtering by repositoryUrl query parameter
-- [ ] T053 [US2] Extend GET /api/scans to support filtering by repositoryBranch query parameter
-- [ ] T054 [US2] Ensure filter queries complete within 2 seconds (SC-002) with existing indexes
+- [X] T052 [US2] Extend GET /api/scans to support filtering by repositoryUrl query parameter
+- [X] T053 [US2] Extend GET /api/scans to support filtering by repositoryBranch query parameter
+- [X] T054 [US2] Ensure filter queries complete within 2 seconds (SC-002) with existing indexes
 
 ### Branch Comparison (US2)
 
-- [ ] T055 [US2] Create GET /api/scans/compare endpoint accepting two scan IDs for finding comparison
-- [ ] T056 [US2] Implement findingsDiff function to identify branch-specific vs common findings
+- [X] T055 [US2] Create GET /api/scans/compare endpoint accepting two scan IDs for finding comparison
+- [X] T056 [US2] Implement findingsDiff function to identify branch-specific vs common findings
 
 ### Scan History UI (US2)
 
-- [ ] T057 [P] [US2] Create RepositoryFilter component with URL and branch dropdowns in ghostshell/components/scans/RepositoryFilter.tsx
-- [ ] T058 [US2] Integrate RepositoryFilter into scan list page
-- [ ] T059 [US2] Display branch badge/tag on scan cards in list view
+- [X] T057 [P] [US2] Create RepositoryFilter component with URL and branch dropdowns in ghostshell/components/scans/RepositoryFilter.tsx
+- [X] T058 [US2] Integrate RepositoryFilter into scan list page
+- [X] T059 [US2] Display branch badge/tag on scan cards in list view
 
 ### Branch Comparison UI (US2)
 

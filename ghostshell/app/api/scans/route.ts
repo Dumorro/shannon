@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
     const statusParam = searchParams.get("status");
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const repositoryUrl = searchParams.get("repositoryUrl"); // T052
+    const repositoryBranch = searchParams.get("repositoryBranch"); // T053
     const cursor = searchParams.get("cursor");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
@@ -40,6 +42,8 @@ export async function GET(request: NextRequest) {
       projectId?: string;
       status?: { in: ScanStatus[] };
       createdAt?: { gte?: Date; lte?: Date };
+      repositoryUrl?: string;
+      repositoryBranch?: string;
     } = {
       organizationId: orgId,
     };
@@ -61,6 +65,16 @@ export async function GET(request: NextRequest) {
       if (endDate) {
         where.createdAt.lte = new Date(endDate);
       }
+    }
+
+    // T052: Filter by repository URL
+    if (repositoryUrl) {
+      where.repositoryUrl = normalizeRepoUrl(repositoryUrl);
+    }
+
+    // T053: Filter by repository branch
+    if (repositoryBranch) {
+      where.repositoryBranch = repositoryBranch;
     }
 
     // Count total
@@ -97,6 +111,10 @@ export async function GET(request: NextRequest) {
       mediumCount: scan.mediumCount,
       lowCount: scan.lowCount,
       createdAt: scan.createdAt,
+      // T030: Include repository fields in response
+      repositoryUrl: scan.repositoryUrl,
+      repositoryBranch: scan.repositoryBranch,
+      repositoryCommitHash: scan.repositoryCommitHash,
     }));
 
     return NextResponse.json({

@@ -318,6 +318,8 @@ model Scan {
   @@index([apiKeyId])
   @@index([repositoryUrl])
   @@index([organizationId, repositoryUrl])
+  @@index([repositoryBranch]) // T054: Support branch filtering
+  @@index([organizationId, repositoryBranch]) // T054: Org-scoped branch filtering
 }
 
 // ScanResult - detailed results from completed scan

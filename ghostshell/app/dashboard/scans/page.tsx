@@ -50,6 +50,10 @@ export default async function ScansPage() {
     mediumCount: scan.mediumCount,
     lowCount: scan.lowCount,
     createdAt: scan.createdAt.toISOString(),
+    // T030: Include repository fields
+    repositoryUrl: scan.repositoryUrl,
+    repositoryBranch: scan.repositoryBranch,
+    repositoryCommitHash: scan.repositoryCommitHash,
   }));
 
   const hasMore = scans.length === 50;
@@ -60,6 +64,7 @@ export default async function ScansPage() {
       initialScans={formattedScans}
       initialNextCursor={nextCursor}
       initialTotal={total}
+      organizationId={orgId}
     />
   );
 }
