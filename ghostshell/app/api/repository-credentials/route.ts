@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { encryptCredential } from "@/lib/git/encryption";
 import { validateRepositoryUrl } from "@/lib/git/validation";
 import { normalizeRepoUrl } from "@/lib/git/normalize";
+import { createAuditLog } from "@/lib/audit";
 import type { CredentialType } from "@prisma/client";
 
 /**
@@ -153,6 +154,19 @@ export async function POST(request: NextRequest) {
         createdBy: true,
         lastValidatedAt: true,
         validationStatus: true,
+      },
+    });
+
+    // T079: Audit log credential creation
+    await createAuditLog({
+      organizationId: orgId,
+      userId: user.id,
+      action: "credential.created",
+      resourceType: "repository_credential",
+      resourceId: newCredential.id,
+      metadata: {
+        repositoryUrl: normalizedUrl,
+        credentialType,
       },
     });
 

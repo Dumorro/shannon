@@ -35,6 +35,10 @@ export interface ReportJsonExport {
     completedAt: string | null;
     durationMs: number | null;
     executiveSummary: string | null;
+    // T082: Include repository metadata for JSON export (Epic 011)
+    repositoryUrl: string | null;
+    repositoryBranch: string | null;
+    repositoryCommitHash: string | null;
   };
   summary: {
     totalFindings: number;
@@ -91,6 +95,10 @@ export function renderToJson(data: ReportData): ReportJsonExport {
       completedAt: data.scan.completedAt?.toISOString() || null,
       durationMs: data.scan.durationMs || null,
       executiveSummary: data.scan.result?.executiveSummary || null,
+      // T082: Include repository metadata for JSON export (Epic 011)
+      repositoryUrl: data.scan.repositoryUrl || null,
+      repositoryBranch: data.scan.repositoryBranch || null,
+      repositoryCommitHash: data.scan.repositoryCommitHash || null,
     },
     summary: {
       totalFindings: data.summary.total,

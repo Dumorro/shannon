@@ -10,10 +10,46 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 
+/**
+ * T078: Redact credentials from error messages and logs.
+ * Removes PAT tokens from HTTPS URLs and SSH key content.
+ */
+function redactCredentials(message: string): string {
+  // Redact PAT tokens from HTTPS URLs
+  let redacted = message.replace(
+    /https:\/\/[^:]+:([^@]+)@/g,
+    'https://x-access-token:[REDACTED]@'
+  );
+
+  // Redact SSH private key content (PEM format)
+  redacted = redacted.replace(
+    /-----BEGIN [A-Z ]+KEY-----[\s\S]*?-----END [A-Z ]+KEY-----/g,
+    '-----BEGIN PRIVATE KEY-----[REDACTED]-----END PRIVATE KEY-----'
+  );
+
+  // Redact potential tokens in plain text
+  redacted = redacted.replace(
+    /\b(ghp_|gho_|github_pat_|glpat-)[A-Za-z0-9_-]{20,}\b/g,
+    '$1[REDACTED]'
+  );
+
+  return redacted;
+}
+
 export interface CloneOptions {
   depth?: number; // Shallow clone depth (default: 1 for performance)
   branch?: string; // Specific branch to clone
   timeout?: number; // Clone timeout in milliseconds (default: 5 minutes)
+}
+
+// T075: Error categories for better diagnostics
+export enum GitErrorType {
+  AUTHENTICATION = 'AUTHENTICATION',
+  NETWORK = 'NETWORK',
+  INVALID_URL = 'INVALID_URL',
+  TIMEOUT = 'TIMEOUT',
+  REPOSITORY_NOT_FOUND = 'REPOSITORY_NOT_FOUND',
+  UNKNOWN = 'UNKNOWN',
 }
 
 export interface CloneResult {
@@ -22,7 +58,96 @@ export interface CloneResult {
   commitHash?: string;
   branch?: string;
   error?: string;
+  errorType?: GitErrorType; // T075: Categorized error type
   durationMs?: number;
+}
+
+/**
+ * T075: Categorize git errors based on error message patterns
+ * Provides specific error types for better diagnostics
+ */
+function categorizeGitError(error: Error): { type: GitErrorType; message: string } {
+  const errorMessage = error.message.toLowerCase();
+
+  // Authentication failures
+  if (
+    errorMessage.includes('authentication failed') ||
+    errorMessage.includes('invalid credentials') ||
+    errorMessage.includes('permission denied') ||
+    errorMessage.includes('access denied') ||
+    errorMessage.includes('authentication required') ||
+    errorMessage.includes('401') ||
+    errorMessage.includes('403 forbidden') ||
+    errorMessage.includes('could not read from remote repository') ||
+    errorMessage.includes('fatal: invalid credentials')
+  ) {
+    return {
+      type: GitErrorType.AUTHENTICATION,
+      message: 'Authentication failed. Please verify your credentials have the correct permissions for this repository.',
+    };
+  }
+
+  // Network errors
+  if (
+    errorMessage.includes('could not resolve host') ||
+    errorMessage.includes('failed to connect') ||
+    errorMessage.includes('connection refused') ||
+    errorMessage.includes('connection timed out') ||
+    errorMessage.includes('network is unreachable') ||
+    errorMessage.includes('temporary failure in name resolution') ||
+    errorMessage.includes('enotfound') ||
+    errorMessage.includes('econnrefused') ||
+    errorMessage.includes('etimedout')
+  ) {
+    return {
+      type: GitErrorType.NETWORK,
+      message: 'Network error occurred. Please check your internet connection and verify the repository URL is accessible.',
+    };
+  }
+
+  // Repository not found
+  if (
+    errorMessage.includes('repository not found') ||
+    errorMessage.includes('404') ||
+    errorMessage.includes('not found') ||
+    errorMessage.includes("remote: repository '") ||
+    errorMessage.includes('does not exist')
+  ) {
+    return {
+      type: GitErrorType.REPOSITORY_NOT_FOUND,
+      message: 'Repository not found. Please verify the repository URL is correct and you have access permissions.',
+    };
+  }
+
+  // Timeout errors
+  if (
+    errorMessage.includes('timeout') ||
+    errorMessage.includes('timed out') ||
+    errorMessage.includes('operation too slow')
+  ) {
+    return {
+      type: GitErrorType.TIMEOUT,
+      message: 'Clone operation timed out. The repository may be too large or the network connection is too slow.',
+    };
+  }
+
+  // Invalid URL format
+  if (
+    errorMessage.includes('invalid url') ||
+    errorMessage.includes('malformed') ||
+    errorMessage.includes('not a git repository')
+  ) {
+    return {
+      type: GitErrorType.INVALID_URL,
+      message: 'Invalid repository URL format. Please provide a valid HTTPS or SSH repository URL.',
+    };
+  }
+
+  // Unknown error - return original message
+  return {
+    type: GitErrorType.UNKNOWN,
+    message: `Clone failed: ${error.message}`,
+  };
 }
 
 /**
@@ -45,17 +170,20 @@ export async function cloneWithPAT(
 
   try {
     // Validate inputs
+    // T075: Improved error messages for invalid inputs
     if (!repoUrl || !repoUrl.startsWith('https://')) {
       return {
         success: false,
-        error: 'Invalid HTTPS repository URL',
+        error: 'Invalid HTTPS repository URL. PAT authentication requires an HTTPS URL (e.g., https://github.com/owner/repo)',
+        errorType: GitErrorType.INVALID_URL,
       };
     }
 
     if (!token) {
       return {
         success: false,
-        error: 'Personal Access Token (PAT) is required',
+        error: 'Personal Access Token (PAT) is required for authentication',
+        errorType: GitErrorType.AUTHENTICATION,
       };
     }
 
@@ -117,9 +245,22 @@ export async function cloneWithPAT(
       // Ignore cleanup errors
     }
 
+    // T075: Categorize error for better diagnostics
+    // T078: Redact credentials from error messages
+    if (error instanceof Error) {
+      const categorized = categorizeGitError(error);
+      return {
+        success: false,
+        error: redactCredentials(categorized.message),
+        errorType: categorized.type,
+        durationMs: Date.now() - startTime,
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown clone error',
+      error: 'Unknown clone error',
+      errorType: GitErrorType.UNKNOWN,
       durationMs: Date.now() - startTime,
     };
   }
@@ -147,17 +288,20 @@ export async function cloneWithSSH(
 
   try {
     // Validate inputs
+    // T075: Improved error messages for invalid inputs
     if (!repoUrl || !repoUrl.startsWith('git@')) {
       return {
         success: false,
-        error: 'Invalid SSH repository URL',
+        error: 'Invalid SSH repository URL. SSH authentication requires an SSH URL (e.g., git@github.com:owner/repo.git)',
+        errorType: GitErrorType.INVALID_URL,
       };
     }
 
     if (!sshKey) {
       return {
         success: false,
-        error: 'SSH private key is required',
+        error: 'SSH private key is required for authentication',
+        errorType: GitErrorType.AUTHENTICATION,
       };
     }
 
@@ -244,9 +388,22 @@ export async function cloneWithSSH(
       // Ignore cleanup errors
     }
 
+    // T075: Categorize error for better diagnostics
+    // T078: Redact credentials from error messages
+    if (error instanceof Error) {
+      const categorized = categorizeGitError(error);
+      return {
+        success: false,
+        error: redactCredentials(categorized.message),
+        errorType: categorized.type,
+        durationMs: Date.now() - startTime,
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown clone error',
+      error: 'Unknown clone error',
+      errorType: GitErrorType.UNKNOWN,
       durationMs: Date.now() - startTime,
     };
   }
@@ -265,7 +422,9 @@ export async function resolveCommitHash(repoPath: string): Promise<string | null
     const log = await git.log({ maxCount: 1 });
     return log.latest?.hash || null;
   } catch (error) {
-    console.error('[clone] Failed to resolve commit hash:', error);
+    // T078: Redact credentials from error messages before logging
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[clone] Failed to resolve commit hash:', redactCredentials(errorMessage));
     return null;
   }
 }

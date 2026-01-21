@@ -198,6 +198,10 @@ export async function buildReportData(reportId: string): Promise<ReportData | nu
       startedAt: report.scan.startedAt,
       completedAt: report.scan.completedAt,
       durationMs: report.scan.durationMs,
+      // T081: Include repository metadata for PDF export (Epic 011)
+      repositoryUrl: report.scan.repositoryUrl,
+      repositoryBranch: report.scan.repositoryBranch,
+      repositoryCommitHash: report.scan.repositoryCommitHash,
       result: report.scan.result
         ? {
             executiveSummary: report.scan.result.executiveSummary,

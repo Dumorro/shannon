@@ -15,7 +15,8 @@ export interface ReportData {
   project: Pick<Project, 'id' | 'name' | 'targetUrl' | 'description'>;
 
   // Scan details
-  scan: Pick<Scan, 'id' | 'status' | 'startedAt' | 'completedAt' | 'durationMs'> & {
+  // T081: Include repository metadata for PDF export (Epic 011)
+  scan: Pick<Scan, 'id' | 'status' | 'startedAt' | 'completedAt' | 'durationMs' | 'repositoryUrl' | 'repositoryBranch' | 'repositoryCommitHash'> & {
     result?: Pick<ScanResult, 'executiveSummary' | 'riskScore'> | null;
   };
 
