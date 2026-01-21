@@ -86,6 +86,10 @@ export async function startScanWorkflow(params: {
   organizationId: string;
   targetUrl: string;
   repositoryUrl?: string;
+  repositoryBranch?: string;
+  repositoryCommitHash?: string;
+  repositoryCredential?: string;
+  repositoryCredentialType?: 'PAT' | 'SSH';
   scanId: string;
   authConfig?: AuthConfig;
 }): Promise<{ workflowId: string; runId: string }> {
@@ -100,6 +104,11 @@ export async function startScanWorkflow(params: {
     workflowId,
     scanId: params.scanId,
     organizationId: params.organizationId,
+    repositoryUrl: params.repositoryUrl,
+    repositoryBranch: params.repositoryBranch,
+    repositoryCommitHash: params.repositoryCommitHash,
+    repositoryCredential: params.repositoryCredential,
+    repositoryCredentialType: params.repositoryCredentialType,
     authConfig: params.authConfig,
   };
 
