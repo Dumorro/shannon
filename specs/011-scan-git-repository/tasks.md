@@ -173,27 +173,27 @@
 
 ### Project Repository Settings API (US3)
 
-- [ ] T063 [US3] Extend PATCH /api/projects/[id] to accept defaultRepositoryUrl and defaultRepositoryBranch
+- [X] T063 [US3] Extend PATCH /api/projects/[id] to accept defaultRepositoryUrl and defaultRepositoryBranch
 
 ### Repository Credentials Management UI (US3)
 
-- [ ] T064 [P] [US3] Create CredentialList component to display all org credentials in ghostshell/components/repository/CredentialList.tsx
-- [ ] T065 [P] [US3] Create CredentialForm component for PAT/SSH credential input with validation in ghostshell/components/repository/CredentialForm.tsx
-- [ ] T066 [US3] Create repository credentials settings page at ghostshell/app/(dashboard)/settings/repository-credentials/page.tsx
-- [ ] T067 [US3] Add credential validation status indicator (valid/invalid/untested) to credential list
-- [ ] T068 [US3] Add "credential in use by N scans" indicator before allowing deletion
+- [X] T064 [P] [US3] Create CredentialList component to display all org credentials in ghostshell/components/repository/CredentialList.tsx
+- [X] T065 [P] [US3] Create CredentialForm component for PAT/SSH credential input with validation in ghostshell/components/repository/CredentialForm.tsx
+- [X] T066 [US3] Create repository credentials settings page at ghostshell/app/(dashboard)/settings/repository-credentials/page.tsx
+- [X] T067 [US3] Add credential validation status indicator (valid/invalid/untested) to credential list
+- [X] T068 [US3] Add "credential in use by N scans" indicator before allowing deletion
 
 ### Project Settings UI (US3)
 
-- [ ] T069 [US3] Add default repository configuration section to project settings page
-- [ ] T070 [US3] Create DefaultRepositoryForm component for project-level defaults in ghostshell/components/projects/DefaultRepositoryForm.tsx
-- [ ] T071 [US3] Show credential connection status for project's default repository
+- [X] T069 [US3] Add default repository configuration section to project settings page
+- [X] T070 [US3] Create DefaultRepositoryForm component for project-level defaults in ghostshell/components/projects/DefaultRepositoryForm.tsx
+- [X] T071 [US3] Show credential connection status for project's default repository
 
 ### Multi-Repository Grouping (US3)
 
-- [ ] T072 [US3] Add repository grouping option to scan list (group by repository URL)
-- [ ] T073 [US3] Create RepositoryGroupHeader component showing repo summary stats in ghostshell/components/scans/RepositoryGroupHeader.tsx
-- [ ] T074 [US3] Display repository badge/tag in finding list to show which repo finding came from
+- [X] T072 [US3] Add repository grouping option to scan list (group by repository URL)
+- [X] T073 [US3] Create RepositoryGroupHeader component showing repo summary stats in ghostshell/components/scans/RepositoryGroupHeader.tsx
+- [X] T074 [US3] Display repository badge/tag in finding list to show which repo finding came from
 
 **Checkpoint**: User Story 3 complete - projects support multiple repositories with credential management UI
 
