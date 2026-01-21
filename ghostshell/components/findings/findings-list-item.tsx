@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, Eye } from "lucide-react";
+import { ExternalLink, Eye, GitFork } from "lucide-react";
 import { SeverityBadge } from "@/components/severity-badge";
 import type { FindingListItem } from "@/lib/types/findings";
 
@@ -75,6 +75,13 @@ export function FindingsListItem({
             <ExternalLink className="h-3 w-3" />
             {finding.scan.targetUrl}
           </span>
+          {/* T074: Repository badge */}
+          {finding.scan.repositoryUrl && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-indigo-700 font-mono">
+              <GitFork className="h-3 w-3" />
+              {finding.scan.repositoryUrl}
+            </span>
+          )}
           <span className="rounded-full bg-gray-100 px-2 py-0.5 capitalize">
             {finding.category}
           </span>

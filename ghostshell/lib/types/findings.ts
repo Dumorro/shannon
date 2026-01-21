@@ -51,6 +51,9 @@ export interface FindingListItem {
   scan: {
     id: string;
     targetUrl: string;
+    // T074: Repository information for badge display
+    repositoryUrl?: string | null;
+    repositoryBranch?: string | null;
   };
 }
 
