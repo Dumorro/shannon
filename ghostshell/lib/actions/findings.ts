@@ -429,6 +429,9 @@ export async function listFindings(
       scan: {
         select: {
           id: true,
+          // T074: Include repository fields
+          repositoryUrl: true,
+          repositoryBranch: true,
           project: {
             select: {
               targetUrl: true,
@@ -469,6 +472,9 @@ export async function listFindings(
     scan: {
       id: f.scan.id,
       targetUrl: f.scan.project.targetUrl,
+      // T074: Include repository fields for badge display
+      repositoryUrl: f.scan.repositoryUrl,
+      repositoryBranch: f.scan.repositoryBranch,
     },
   }));
 

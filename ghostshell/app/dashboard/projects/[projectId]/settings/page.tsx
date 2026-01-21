@@ -5,6 +5,7 @@ import { getCurrentUser, hasOrgAccess } from "@/lib/auth";
 import { getAuthConfig } from "@/lib/actions/auth-config";
 import { db } from "@/lib/db";
 import { AuthConfigForm } from "@/components/auth-config/auth-config-form";
+import { DefaultRepositoryForm } from "@/components/projects/DefaultRepositoryForm";
 
 interface ProjectSettingsPageProps {
   params: Promise<{ projectId: string }>;
@@ -123,6 +124,15 @@ export default async function ProjectSettingsPage({
         <AuthConfigForm
           projectId={projectId}
           initialConfig={authConfig || undefined}
+        />
+      </div>
+
+      {/* T069: Default Repository Settings */}
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <DefaultRepositoryForm
+          projectId={projectId}
+          initialDefaultRepositoryUrl={project.defaultRepositoryUrl}
+          initialDefaultRepositoryBranch={project.defaultRepositoryBranch}
         />
       </div>
     </div>

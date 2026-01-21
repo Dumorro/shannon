@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Layers, List } from "lucide-react";
 import { ScanHistoryTable } from "./scan-history-table";
 import { ScanFilters, type ScanStatusFilter } from "./scan-filters";
 import { RepositoryFilter, type RepositoryFilterState } from "./RepositoryFilter";
+import { RepositoryGroupHeader } from "./RepositoryGroupHeader";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface Scan {
@@ -53,6 +54,8 @@ export function ScansPageClient({
   }>({ status: [] });
   // T058: Repository filter state
   const [repositoryFilters, setRepositoryFilters] = useState<RepositoryFilterState>({});
+  // T072: Repository grouping state
+  const [groupByRepository, setGroupByRepository] = useState(false);
 
   const fetchScans = useCallback(async (
     cursor?: string,
@@ -127,6 +130,66 @@ export function ScansPageClient({
     await fetchScans(nextCursor);
   }, [nextCursor, fetchScans]);
 
+  // T072: Group scans by repository URL
+  const groupedScans = useMemo(() => {
+    if (!groupByRepository) return null;
+
+    const groups = new Map<
+      string,
+      {
+        repositoryUrl: string;
+        scans: Scan[];
+        totalFindings: number;
+        criticalCount: number;
+        highCount: number;
+        mediumCount: number;
+        lowCount: number;
+        latestScanDate: string | null;
+      }
+    >();
+
+    // Group scans by repository URL
+    scans.forEach((scan) => {
+      const repoUrl = scan.repositoryUrl || "No Repository";
+
+      if (!groups.has(repoUrl)) {
+        groups.set(repoUrl, {
+          repositoryUrl: repoUrl,
+          scans: [],
+          totalFindings: 0,
+          criticalCount: 0,
+          highCount: 0,
+          mediumCount: 0,
+          lowCount: 0,
+          latestScanDate: null,
+        });
+      }
+
+      const group = groups.get(repoUrl)!;
+      group.scans.push(scan);
+      group.totalFindings += scan.findingsCount;
+      group.criticalCount += scan.criticalCount;
+      group.highCount += scan.highCount;
+      group.mediumCount += scan.mediumCount;
+      group.lowCount += scan.lowCount;
+
+      // Update latest scan date
+      if (
+        scan.completedAt &&
+        (!group.latestScanDate || scan.completedAt > group.latestScanDate)
+      ) {
+        group.latestScanDate = scan.completedAt;
+      }
+    });
+
+    // Convert to array and sort by latest scan date
+    return Array.from(groups.values()).sort((a, b) => {
+      if (!a.latestScanDate) return 1;
+      if (!b.latestScanDate) return -1;
+      return b.latestScanDate.localeCompare(a.latestScanDate);
+    });
+  }, [scans, groupByRepository]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -161,14 +224,68 @@ export function ScansPageClient({
           initialRepositoryBranch={repositoryFilters.repositoryBranch}
           organizationId={organizationId}
         />
+        {/* T072: Group by repository toggle */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setGroupByRepository(!groupByRepository)}
+            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              groupByRepository
+                ? "bg-indigo-100 text-indigo-700 border border-indigo-200"
+                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+            }`}
+          >
+            {groupByRepository ? (
+              <>
+                <Layers className="h-4 w-4" />
+                Grouped by Repository
+              </>
+            ) : (
+              <>
+                <List className="h-4 w-4" />
+                List View
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Scans table */}
-      <ScanHistoryTable
-        scans={scans}
-        nextCursor={nextCursor}
-        total={total}
-      />
+      {/* Scans table or grouped view */}
+      {groupByRepository && groupedScans ? (
+        // T072: Grouped view by repository
+        <div className="space-y-4">
+          {groupedScans.map((group) => (
+            <div
+              key={group.repositoryUrl}
+              className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+            >
+              <RepositoryGroupHeader
+                repositoryUrl={group.repositoryUrl}
+                scanCount={group.scans.length}
+                totalFindings={group.totalFindings}
+                criticalCount={group.criticalCount}
+                highCount={group.highCount}
+                mediumCount={group.mediumCount}
+                lowCount={group.lowCount}
+                latestScanDate={group.latestScanDate}
+                defaultExpanded={true}
+              />
+              <ScanHistoryTable
+                scans={group.scans}
+                nextCursor={null}
+                total={group.scans.length}
+                hideHeader={true}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Standard list view
+        <ScanHistoryTable
+          scans={scans}
+          nextCursor={nextCursor}
+          total={total}
+        />
+      )}
 
       {/* Pagination */}
       <PaginationControls
