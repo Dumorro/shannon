@@ -6,6 +6,8 @@ import { getCurrentUser, hasOrgAccess } from "@/lib/auth";
 import { startScanWorkflow, cancelScanWorkflow } from "@/lib/temporal/client";
 import { checkConcurrentLimit } from "@/lib/scan-queue";
 import { decryptCredentials } from "@/lib/encryption";
+import { normalizeRepoUrl } from "@/lib/git/normalize";
+import { decryptCredential } from "@/lib/git/encryption";
 import type { ScanStatus } from "@prisma/client";
 import type { AuthConfig } from "@/lib/temporal/types";
 
@@ -118,7 +120,10 @@ export async function getScan(orgId: string, scanId: string) {
 export async function startScan(
   orgId: string,
   projectId: string,
-  targetUrlOverride?: string
+  targetUrlOverride?: string,
+  repositoryUrlOverride?: string,
+  repositoryBranchOverride?: string,
+  repositoryCommitHash?: string
 ) {
   const hasAccess = await hasOrgAccess(orgId, ["owner", "admin", "member"]);
   if (!hasAccess) {
@@ -149,6 +154,36 @@ export async function startScan(
   }
 
   const targetUrl = targetUrlOverride || project.targetUrl;
+
+  // Repository configuration - inherit from project defaults or use overrides
+  const repositoryUrl = repositoryUrlOverride || project.defaultRepositoryUrl;
+  const repositoryBranch = repositoryBranchOverride || project.defaultRepositoryBranch || "main";
+
+  // Credential snapshot - resolve and cache credential at scan creation time
+  let decryptedCredential: string | undefined;
+  let credentialType: "PAT" | "SSH" | undefined;
+
+  if (repositoryUrl) {
+    // Normalize repository URL for lookup
+    const normalizedUrl = normalizeRepoUrl(repositoryUrl);
+
+    // Fetch credential from database
+    const credential = await db.repositoryCredentials.findFirst({
+      where: {
+        organizationId: orgId,
+        repositoryUrl: normalizedUrl,
+      },
+    });
+
+    if (credential) {
+      // Decrypt credential at scan creation time (snapshot)
+      decryptedCredential = decryptCredential(credential.encryptedCredential, orgId);
+      credentialType = credential.credentialType;
+    } else {
+      // No credential found - proceed without repository cloning
+      console.warn(`No credential found for repository: ${normalizedUrl}`);
+    }
+  }
 
   // Build auth config for workflow (if configured)
   let authConfig: AuthConfig | undefined;
@@ -192,6 +227,9 @@ export async function startScan(
         projectId: project.id,
         status: "PENDING",
         source: "MANUAL",
+        repositoryUrl,
+        repositoryBranch,
+        repositoryCommitHash,
       },
     });
 
@@ -206,6 +244,9 @@ export async function startScan(
           projectId: project.id,
           projectName: project.name,
           targetUrl,
+          repositoryUrl,
+          repositoryBranch,
+          repositoryCommitHash,
           hasAuthConfig: !!authConfig,
           authMethod: authConfig?.method || null,
         },
@@ -221,7 +262,11 @@ export async function startScan(
       projectId: project.id,
       organizationId: orgId,
       targetUrl,
-      repositoryUrl: project.repositoryUrl || undefined,
+      repositoryUrl,
+      repositoryBranch,
+      repositoryCommitHash,
+      repositoryCredential: decryptedCredential,
+      repositoryCredentialType: credentialType,
       scanId: scan.id,
       authConfig,
     });
@@ -507,8 +552,11 @@ export async function getScans(orgId: string) {
 export async function createScan(params: {
   targetUrl: string;
   organizationId: string;
+  repositoryUrl?: string;
+  repositoryBranch?: string;
+  repositoryCommitHash?: string;
 }): Promise<{ success?: boolean; scanId?: string; error?: string }> {
-  const { targetUrl, organizationId } = params;
+  const { targetUrl, organizationId, repositoryUrl, repositoryBranch, repositoryCommitHash } = params;
 
   const hasAccess = await hasOrgAccess(organizationId, ["owner", "admin", "member"]);
   if (!hasAccess) {
@@ -539,12 +587,21 @@ export async function createScan(params: {
           organizationId,
           name: parsedUrl.hostname,
           targetUrl: targetUrl,
+          defaultRepositoryUrl: repositoryUrl || null,
+          defaultRepositoryBranch: repositoryBranch || null,
         },
       });
     }
 
-    // Start the scan
-    const scan = await startScan(organizationId, project.id);
+    // Start the scan with repository parameters
+    const scan = await startScan(
+      organizationId,
+      project.id,
+      undefined, // targetUrlOverride
+      repositoryUrl,
+      repositoryBranch,
+      repositoryCommitHash
+    );
 
     return { success: true, scanId: scan.id };
   } catch (err) {
