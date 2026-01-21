@@ -157,9 +157,9 @@
 
 ### Branch Comparison UI (US2)
 
-- [ ] T060 [P] [US2] Create ScanComparison component to show side-by-side findings in ghostshell/components/scans/ScanComparison.tsx
-- [ ] T061 [US2] Add "Compare with..." action button to scan detail page
-- [ ] T062 [US2] Highlight branch-specific findings (unique to one branch) in comparison view
+- [X] T060 [P] [US2] Create ScanComparison component to show side-by-side findings in ghostshell/components/scans/ScanComparison.tsx
+- [X] T061 [US2] Add "Compare with..." action button to scan detail page
+- [X] T062 [US2] Highlight branch-specific findings (unique to one branch) in comparison view
 
 **Checkpoint**: User Story 2 complete - users can filter scans by branch and compare findings across branches
 
