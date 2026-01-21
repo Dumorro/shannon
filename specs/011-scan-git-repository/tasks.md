@@ -101,9 +101,9 @@
 - [X] T034 [US1] Add shallow clone with --depth 1 for performance in cloneRepository activity
 - [X] T035 [US1] Add commit hash resolution (git rev-parse HEAD) when only branch provided in shannon/src/temporal/activities.ts
 - [X] T036 [US1] Create cleanupRepository activity to delete cloned repo (within 5 min per SC-008) in shannon/src/temporal/activities.ts
-- [ ] T037 [US1] Extend pentestPipelineWorkflow to call cloneRepository at scan start in shannon/src/temporal/workflows.ts
-- [ ] T038 [US1] Extend pentestPipelineWorkflow to call cleanupRepository after scan completion (including failures) in shannon/src/temporal/workflows.ts
-- [ ] T039 [US1] Pass repository path to Claude executor for code context in shannon/src/ai/claude-executor.ts
+- [X] T037 [US1] Extend pentestPipelineWorkflow to call cloneRepository at scan start in shannon/src/temporal/workflows.ts
+- [X] T038 [US1] Extend pentestPipelineWorkflow to call cleanupRepository after scan completion (including failures) in shannon/src/temporal/workflows.ts
+- [X] T039 [US1] Pass repository path to Claude executor for code context in shannon/src/ai/claude-executor.ts
 
 ### Code Snippet Integration (US1)
 

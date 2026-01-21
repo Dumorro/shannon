@@ -60,6 +60,13 @@ export interface PipelineState {
     namespace: string;
     status: string;
   };
+
+  // Repository cloning state (Epic 011)
+  repositoryInfo?: {
+    clonedPath: string;
+    commitHash: string;
+    branch: string;
+  };
 }
 
 // Extended state returned by getProgress query (includes computed fields)

@@ -172,6 +172,36 @@ export async function pentestPipelineWorkflow(
       await a.logPhaseTransition(activityInput, 'container-setup', 'complete');
     }
 
+    // === Repository Cloning (Epic 011, T037) ===
+    // Clone repository at scan start if repository URL and credentials provided
+    if (input.repositoryUrl && input.repositoryCredential && input.repositoryCredentialType) {
+      state.currentPhase = 'repository-clone';
+      state.currentAgent = null;
+      await a.logPhaseTransition(activityInput, 'repository-clone', 'start');
+
+      const cloneResult = await a.cloneRepositoryActivity({
+        repositoryUrl: input.repositoryUrl,
+        repositoryBranch: input.repositoryBranch,
+        repositoryCommitHash: input.repositoryCommitHash,
+        credential: input.repositoryCredential,
+        credentialType: input.repositoryCredentialType,
+        targetDir: `/tmp/scan-repos/${workflowId}`,
+      });
+
+      if (cloneResult.success && cloneResult.repoPath && cloneResult.commitHash && cloneResult.branch) {
+        state.repositoryInfo = {
+          clonedPath: cloneResult.repoPath,
+          commitHash: cloneResult.commitHash,
+          branch: cloneResult.branch,
+        };
+
+        // Update activityInput.repoPath for all subsequent activities (T039)
+        activityInput.repoPath = cloneResult.repoPath;
+      }
+
+      await a.logPhaseTransition(activityInput, 'repository-clone', 'complete');
+    }
+
     // === Phase 1: Pre-Reconnaissance ===
     state.currentPhase = 'pre-recon';
     state.currentAgent = 'pre-recon';
@@ -331,6 +361,20 @@ export async function pentestPipelineWorkflow(
       ),
     });
 
+    // === Repository Cleanup (Epic 011, T038) ===
+    // Delete cloned repository after successful completion
+    if (state.repositoryInfo?.clonedPath) {
+      state.currentPhase = 'repository-cleanup';
+      await a.logPhaseTransition(activityInput, 'repository-cleanup', 'start');
+
+      await a.cleanupRepositoryActivity({
+        repoPath: state.repositoryInfo.clonedPath,
+      });
+
+      await a.logPhaseTransition(activityInput, 'repository-cleanup', 'complete');
+      state.currentPhase = null;
+    }
+
     // === Container Cleanup (Epic 006) ===
     // Terminate container after successful completion
     if (state.containerInfo?.podName) {
@@ -369,6 +413,21 @@ export async function pentestPipelineWorkflow(
       ),
       error: state.error ?? undefined,
     });
+
+    // === Repository Cleanup (Epic 011, T038) ===
+    // Delete cloned repository after failure (best-effort, don't throw)
+    if (state.repositoryInfo?.clonedPath) {
+      try {
+        await a.cleanupRepositoryActivity({
+          repoPath: state.repositoryInfo.clonedPath,
+        });
+      } catch (cleanupError) {
+        // Log but don't fail - cleanup is best-effort
+        console.log(
+          `⚠️ Repository cleanup failed: ${cleanupError instanceof Error ? cleanupError.message : String(cleanupError)}`
+        );
+      }
+    }
 
     // === Container Cleanup (Epic 006) ===
     // Terminate container after failure (best-effort, don't throw)
