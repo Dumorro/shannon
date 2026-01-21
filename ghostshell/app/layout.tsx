@@ -4,6 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ToastProvider } from "@/components/toast-provider";
 import "./globals.css";
 
+// Force dynamic rendering to avoid static generation errors with Clerk during Docker builds
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

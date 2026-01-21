@@ -17,13 +17,16 @@ COPY shannon/mcp-server/package*.json ./shannon/mcp-server/
 COPY ghostshell/prisma ./ghostshell/prisma
 
 # Install all dependencies (including devDependencies for TypeScript build)
-RUN cd shannon && npm ci && \
-    cd mcp-server && npm ci && cd ..
+RUN cd shannon && npm install && \
+    cd mcp-server && npm install && cd ..
 
 # Copy shannon source code
 COPY shannon/ ./shannon/
 
-# Build TypeScript
+# Build MCP server first (Shannon depends on it)
+RUN cd shannon/mcp-server && npm run build
+
+# Build Shannon TypeScript
 RUN cd shannon && npm run build
 
 # Remove devDependencies after build

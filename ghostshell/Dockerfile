@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -21,8 +21,10 @@ RUN npx prisma generate
 
 # Build the application
 ENV NEXT_TELEMETRY_DISABLED=1
-# Provide placeholder values for build-time only (actual values set at runtime)
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_placeholder
+# Skip environment validation and use placeholder for build
+# Actual Clerk keys will be provided at runtime via environment variables
+ENV SKIP_ENV_VALIDATION=1
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_placeholder
 RUN npm run build
 
 # Production image, copy all the files and run next
