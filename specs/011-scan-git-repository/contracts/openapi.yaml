@@ -1,0 +1,473 @@
+openapi: 3.1.0
+info:
+  title: Shannon Git Repository Tracking API
+  version: 1.0.0
+  description: |
+    API contracts for git repository tracking in Shannon security scans.
+    Includes repository credentials management and scan configuration.
+
+servers:
+  - url: /api
+    description: GhostShell API
+
+paths:
+  /repository-credentials:
+    get:
+      summary: List repository credentials
+      description: Returns all repository credentials for the current organization
+      operationId: listRepositoryCredentials
+      tags:
+        - Repository Credentials
+      responses:
+        '200':
+          description: List of repository credentials (credentials encrypted)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credentials:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RepositoryCredentialSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create repository credential
+      description: Add a new repository credential for the current organization
+      operationId: createRepositoryCredential
+      tags:
+        - Repository Credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRepositoryCredentialRequest'
+      responses:
+        '201':
+          description: Credential created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryCredentialSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Credential already exists for this repository URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /repository-credentials/{credentialId}:
+    parameters:
+      - name: credentialId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Credential ID
+
+    get:
+      summary: Get repository credential
+      description: Returns a single repository credential (without decrypted secret)
+      operationId: getRepositoryCredential
+      tags:
+        - Repository Credentials
+      responses:
+        '200':
+          description: Repository credential details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryCredentialSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Update repository credential
+      description: Update credential name or replace the secret
+      operationId: updateRepositoryCredential
+      tags:
+        - Repository Credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRepositoryCredentialRequest'
+      responses:
+        '200':
+          description: Credential updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepositoryCredentialSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete repository credential
+      description: Remove a repository credential
+      operationId: deleteRepositoryCredential
+      tags:
+        - Repository Credentials
+      responses:
+        '204':
+          description: Credential deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /repository-credentials/validate:
+    post:
+      summary: Validate repository access
+      description: Test if credentials can access the specified repository
+      operationId: validateRepositoryAccess
+      tags:
+        - Repository Credentials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - repositoryUrl
+              properties:
+                repositoryUrl:
+                  type: string
+                  format: uri
+                  description: Repository URL to validate
+                credentialId:
+                  type: string
+                  description: Optional credential ID (uses stored credential)
+                credential:
+                  $ref: '#/components/schemas/CredentialInput'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  error:
+                    type: string
+                    description: Error message if validation failed
+                  errorType:
+                    type: string
+                    enum: [network, auth, invalid_url, timeout]
+                    description: Category of error
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /scans:
+    post:
+      summary: Create scan with repository
+      description: Start a new scan with optional repository configuration
+      operationId: createScan
+      tags:
+        - Scans
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScanRequest'
+      responses:
+        '201':
+          description: Scan created and queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /scans/{scanId}:
+    get:
+      summary: Get scan details
+      description: Returns scan details including repository information
+      operationId: getScan
+      tags:
+        - Scans
+      parameters:
+        - name: scanId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Scan details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scan'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}:
+    patch:
+      summary: Update project repository settings
+      description: Set default repository URL and branch for a project
+      operationId: updateProjectRepository
+      tags:
+        - Projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                repositoryUrl:
+                  type: string
+                  format: uri
+                  nullable: true
+                repositoryBranch:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    RepositoryCredentialSummary:
+      type: object
+      required:
+        - id
+        - repositoryUrl
+        - credentialType
+        - createdAt
+      properties:
+        id:
+          type: string
+        repositoryUrl:
+          type: string
+          format: uri
+        credentialType:
+          type: string
+          enum: [PAT, SSH]
+        name:
+          type: string
+          nullable: true
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateRepositoryCredentialRequest:
+      type: object
+      required:
+        - repositoryUrl
+        - credentialType
+        - credential
+      properties:
+        repositoryUrl:
+          type: string
+          format: uri
+          description: Git repository URL (HTTPS or SSH)
+        credentialType:
+          type: string
+          enum: [PAT, SSH]
+        credential:
+          $ref: '#/components/schemas/CredentialInput'
+        name:
+          type: string
+          description: User-friendly name for the credential
+
+    UpdateRepositoryCredentialRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        credential:
+          $ref: '#/components/schemas/CredentialInput'
+
+    CredentialInput:
+      type: object
+      description: Credential data (PAT token or SSH key)
+      properties:
+        token:
+          type: string
+          description: Personal access token (for PAT type)
+        privateKey:
+          type: string
+          description: SSH private key content (for SSH type)
+        passphrase:
+          type: string
+          description: SSH key passphrase if encrypted
+
+    CreateScanRequest:
+      type: object
+      required:
+        - projectId
+      properties:
+        projectId:
+          type: string
+        repositoryUrl:
+          type: string
+          format: uri
+          description: Override project default repository URL
+        repositoryBranch:
+          type: string
+          description: Branch to scan (default from project or 'main')
+        repositoryCommitHash:
+          type: string
+          pattern: '^[a-f0-9]{40}$'
+          description: Specific commit to scan (auto-resolved from branch if not provided)
+
+    Scan:
+      type: object
+      required:
+        - id
+        - projectId
+        - organizationId
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+        projectId:
+          type: string
+        organizationId:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, TIMEOUT]
+        repositoryUrl:
+          type: string
+          format: uri
+          nullable: true
+        repositoryBranch:
+          type: string
+          nullable: true
+        repositoryCommitHash:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        findingsCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        targetUrl:
+          type: string
+          format: uri
+        repositoryUrl:
+          type: string
+          format: uri
+          nullable: true
+        repositoryBranch:
+          type: string
+          nullable: true
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    ClerkAuth:
+      type: http
+      scheme: bearer
+      description: Clerk session token
+
+security:
+  - ClerkAuth: []
+
+tags:
+  - name: Repository Credentials
+    description: Manage git repository credentials for authenticated scanning
+  - name: Scans
+    description: Security scan operations with repository support
+  - name: Projects
+    description: Project configuration including repository defaults
