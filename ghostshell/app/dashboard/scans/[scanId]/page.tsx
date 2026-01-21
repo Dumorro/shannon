@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { ScanDetailCard } from "@/components/scans/scan-detail-card";
 import { ScanProgress } from "@/components/scans/scan-progress";
 import { CancelScanButton } from "@/components/scans/cancel-scan-button";
+import { CompareScanButton } from "@/components/scans/compare-scan-button";
 import { ScanFindingsSection } from "@/components/scans/scan-findings-section";
 
 export const dynamic = "force-dynamic";
@@ -97,7 +98,7 @@ export default async function ScanDetailPage({ params }: ScanDetailPageProps) {
         Back to Scans
       </Link>
 
-      {/* Header with cancel button */}
+      {/* Header with action buttons */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Scan Details</h1>
@@ -105,7 +106,17 @@ export default async function ScanDetailPage({ params }: ScanDetailPageProps) {
             Scan ID: {scan.id}
           </p>
         </div>
-        {canCancel && <CancelScanButton scanId={scan.id} />}
+        <div className="flex items-center gap-2">
+          {/* T061: Compare with button */}
+          {scan.status === "COMPLETED" && (
+            <CompareScanButton
+              currentScanId={scan.id}
+              repositoryUrl={scan.repositoryUrl}
+              repositoryBranch={scan.repositoryBranch}
+            />
+          )}
+          {canCancel && <CancelScanButton scanId={scan.id} />}
+        </div>
       </div>
 
       {/* Progress (if running) */}
