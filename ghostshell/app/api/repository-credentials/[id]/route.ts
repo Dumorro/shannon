@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { encryptCredential } from "@/lib/git/encryption";
+import { createAuditLog } from "@/lib/audit";
 import type { CredentialType } from "@prisma/client";
 
 /**
@@ -167,6 +168,21 @@ export async function PATCH(
       },
     });
 
+    // T079: Audit log credential update
+    await createAuditLog({
+      organizationId: orgId,
+      userId: user.id,
+      action: "credential.updated",
+      resourceType: "repository_credential",
+      resourceId: id,
+      metadata: {
+        repositoryUrl: updated.repositoryUrl,
+        credentialType: updated.credentialType,
+        credentialChanged: credential !== undefined,
+        validationStatusChanged: validationStatus !== undefined,
+      },
+    });
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Error updating repository credential:", error);
@@ -225,6 +241,19 @@ export async function DELETE(
     // Delete the credential
     await db.repositoryCredentials.delete({
       where: { id },
+    });
+
+    // T079: Audit log credential deletion
+    await createAuditLog({
+      organizationId: orgId,
+      userId: user.id,
+      action: "credential.deleted",
+      resourceType: "repository_credential",
+      resourceId: id,
+      metadata: {
+        repositoryUrl: existing.repositoryUrl,
+        credentialType: existing.credentialType,
+      },
     });
 
     return new NextResponse(null, { status: 204 });

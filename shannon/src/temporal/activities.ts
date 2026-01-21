@@ -79,6 +79,38 @@ import type { SessionMetadata } from '../audit/utils.js';
 const HEARTBEAT_INTERVAL_MS = 2000; // Must be < heartbeatTimeout (10min production, 5min testing)
 
 /**
+ * T078: Redact credentials from error messages and logs.
+ * Removes PAT tokens from HTTPS URLs and SSH key content.
+ *
+ * @param message - Error message or log string that might contain credentials
+ * @returns Redacted message with credentials replaced by [REDACTED]
+ */
+function redactCredentials(message: string): string {
+  // Redact PAT tokens from HTTPS URLs
+  // Pattern: https://x-access-token:TOKEN@github.com or https://oauth2:TOKEN@gitlab.com
+  let redacted = message.replace(
+    /https:\/\/[^:]+:([^@]+)@/g,
+    'https://x-access-token:[REDACTED]@'
+  );
+
+  // Redact SSH private key content (PEM format)
+  // Pattern: -----BEGIN ... KEY-----\n...\n-----END ... KEY-----
+  redacted = redacted.replace(
+    /-----BEGIN [A-Z ]+KEY-----[\s\S]*?-----END [A-Z ]+KEY-----/g,
+    '-----BEGIN PRIVATE KEY-----[REDACTED]-----END PRIVATE KEY-----'
+  );
+
+  // Redact potential tokens in plain text (base64-like strings longer than 20 chars)
+  // Only redact if it looks like a token (starts with common prefixes or is very long)
+  redacted = redacted.replace(
+    /\b(ghp_|gho_|github_pat_|glpat-)[A-Za-z0-9_-]{20,}\b/g,
+    '$1[REDACTED]'
+  );
+
+  return redacted;
+}
+
+/**
  * Input for all agent activities.
  * Matches PipelineInput but with required workflowId for audit correlation.
  */
@@ -670,6 +702,7 @@ export async function cloneRepositoryActivity(input: {
 
     const { repositoryUrl, repositoryBranch, credential, credentialType, targetDir } = input;
 
+    // T078: Never log credentials - only log the original repository URL
     console.log(chalk.blue(`🔄 Cloning repository: ${repositoryUrl}`));
 
     // Validate inputs
@@ -759,6 +792,63 @@ export async function cloneRepositoryActivity(input: {
     const log = await repoGit.log({ maxCount: 1 });
     const commitHash = log.latest?.hash;
 
+    // T077: If specific commit hash was requested, verify it exists
+    if (input.repositoryCommitHash) {
+      try {
+        // Try to show the commit to verify it exists
+        await repoGit.show([input.repositoryCommitHash, '--quiet']);
+      } catch (commitError) {
+        const commitErrorMessage = commitError instanceof Error ? commitError.message : String(commitError);
+
+        // Clean up cloned directory on commit validation failure
+        try {
+          await fs.rm(targetDir, { recursive: true, force: true });
+        } catch {
+          // Ignore cleanup errors
+        }
+
+        // Clean up SSH key if used
+        if (sshKeyPath) {
+          try {
+            await fs.unlink(sshKeyPath);
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
+
+        // T077: Provide helpful error message for commit-not-found
+        if (
+          commitErrorMessage.includes('unknown revision') ||
+          commitErrorMessage.includes('not found') ||
+          commitErrorMessage.includes('bad revision') ||
+          commitErrorMessage.includes('ambiguous argument')
+        ) {
+          throw ApplicationFailure.create({
+            message: truncateErrorMessage(
+              `Commit ${input.repositoryCommitHash} not found in repository. ` +
+              `This can happen with shallow clones (--depth 1) when the commit is not on the HEAD of the branch. ` +
+              `Suggestion: Try specifying a branch name instead of a commit hash, or ensure the commit is on the tip of the specified branch.`
+            ),
+            type: 'COMMIT_NOT_FOUND',
+            nonRetryable: true, // Don't retry - user needs to provide valid input
+          });
+        }
+
+        // Re-throw other commit validation errors
+        throw commitError;
+      }
+
+      // Commit exists but is not HEAD - warn user
+      if (commitHash !== input.repositoryCommitHash) {
+        console.warn(
+          chalk.yellow(
+            `⚠️  Repository was cloned at HEAD (${commitHash}) instead of requested commit (${input.repositoryCommitHash}). ` +
+            `Shallow clones only fetch the latest commit. To scan a specific commit, use a full clone or ensure the commit is at the tip of a branch.`
+          )
+        );
+      }
+    }
+
     // Get current branch
     const branchSummary = await repoGit.branch();
     const currentBranch = branchSummary.current;
@@ -786,7 +876,10 @@ export async function cloneRepositoryActivity(input: {
     const durationMs = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : 'Unknown clone error';
 
-    console.error(chalk.red(`❌ Repository clone failed: ${errorMessage}`));
+    // T078: Redact credentials from error messages before logging or throwing
+    const redactedErrorMessage = redactCredentials(errorMessage);
+
+    console.error(chalk.red(`❌ Repository clone failed: ${redactedErrorMessage}`));
 
     // Classify errors for retry behavior
     if (
@@ -795,7 +888,7 @@ export async function cloneRepositoryActivity(input: {
       errorMessage.includes('invalid credentials')
     ) {
       throw ApplicationFailure.create({
-        message: truncateErrorMessage(`Repository authentication failed: ${errorMessage}`),
+        message: truncateErrorMessage(redactCredentials(`Repository authentication failed: ${errorMessage}`)),
         type: 'AUTH_FAILED',
         nonRetryable: true, // Don't retry auth failures
       });
@@ -807,7 +900,7 @@ export async function cloneRepositoryActivity(input: {
       errorMessage.includes('Could not resolve')
     ) {
       throw ApplicationFailure.create({
-        message: truncateErrorMessage(`Repository not found: ${errorMessage}`),
+        message: truncateErrorMessage(redactCredentials(`Repository not found: ${errorMessage}`)),
         type: 'NOT_FOUND',
         nonRetryable: true, // Don't retry not found errors
       });
@@ -815,7 +908,7 @@ export async function cloneRepositoryActivity(input: {
 
     if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
       throw ApplicationFailure.create({
-        message: truncateErrorMessage(`Repository clone timed out: ${errorMessage}`),
+        message: truncateErrorMessage(redactCredentials(`Repository clone timed out: ${errorMessage}`)),
         type: 'CLONE_TIMEOUT',
         nonRetryable: false, // Retry timeouts
       });
@@ -829,7 +922,7 @@ export async function cloneRepositoryActivity(input: {
       errorMessage.includes('ENOTFOUND')
     ) {
       throw ApplicationFailure.create({
-        message: truncateErrorMessage(`Network error during clone: ${errorMessage}`),
+        message: truncateErrorMessage(redactCredentials(`Network error during clone: ${errorMessage}`)),
         type: 'NETWORK_ERROR',
         nonRetryable: false, // Retry network errors
       });
@@ -837,7 +930,7 @@ export async function cloneRepositoryActivity(input: {
 
     // Unknown errors are retryable
     throw ApplicationFailure.create({
-      message: truncateErrorMessage(`Repository clone failed: ${errorMessage}`),
+      message: truncateErrorMessage(redactCredentials(`Repository clone failed: ${errorMessage}`)),
       type: 'CLONE_FAILED',
       nonRetryable: false,
     });

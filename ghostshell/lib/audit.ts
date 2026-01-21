@@ -39,7 +39,11 @@ export type AuditAction =
   | "scan.failed"
   // Finding events
   | "finding.created"
-  | "finding.status_changed";
+  | "finding.status_changed"
+  // T079: Repository credential events (Epic 011)
+  | "credential.created"
+  | "credential.updated"
+  | "credential.deleted";
 
 interface AuditLogParams {
   organizationId: string;

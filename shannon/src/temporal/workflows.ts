@@ -179,24 +179,45 @@ export async function pentestPipelineWorkflow(
       state.currentAgent = null;
       await a.logPhaseTransition(activityInput, 'repository-clone', 'start');
 
-      const cloneResult = await a.cloneRepositoryActivity({
-        repositoryUrl: input.repositoryUrl,
-        repositoryBranch: input.repositoryBranch,
-        repositoryCommitHash: input.repositoryCommitHash,
-        credential: input.repositoryCredential,
-        credentialType: input.repositoryCredentialType,
-        targetDir: `/tmp/scan-repos/${workflowId}`,
-      });
+      // T076: Graceful degradation for clone timeouts
+      try {
+        const cloneResult = await a.cloneRepositoryActivity({
+          repositoryUrl: input.repositoryUrl,
+          repositoryBranch: input.repositoryBranch,
+          repositoryCommitHash: input.repositoryCommitHash,
+          credential: input.repositoryCredential,
+          credentialType: input.repositoryCredentialType,
+          targetDir: `/tmp/scan-repos/${workflowId}`,
+        });
 
-      if (cloneResult.success && cloneResult.repoPath && cloneResult.commitHash && cloneResult.branch) {
-        state.repositoryInfo = {
-          clonedPath: cloneResult.repoPath,
-          commitHash: cloneResult.commitHash,
-          branch: cloneResult.branch,
-        };
+        if (cloneResult.success && cloneResult.repoPath && cloneResult.commitHash && cloneResult.branch) {
+          state.repositoryInfo = {
+            clonedPath: cloneResult.repoPath,
+            commitHash: cloneResult.commitHash,
+            branch: cloneResult.branch,
+          };
 
-        // Update activityInput.repoPath for all subsequent activities (T039)
-        activityInput.repoPath = cloneResult.repoPath;
+          // Update activityInput.repoPath for all subsequent activities (T039)
+          activityInput.repoPath = cloneResult.repoPath;
+        } else if (cloneResult.error) {
+          // T076: Log warning but continue scan with URL only
+          console.warn(`⚠️  Repository clone failed: ${cloneResult.error}`);
+          console.warn('Continuing scan with URL only (no code analysis)');
+        }
+      } catch (error: any) {
+        // T076: Handle timeouts and transient errors gracefully
+        const errorType = error?.type || '';
+        const errorMessage = error?.message || String(error);
+
+        if (errorType === 'CLONE_TIMEOUT' || errorType === 'NETWORK_ERROR') {
+          // Gracefully degrade for timeouts and network errors
+          console.warn(`⚠️  Repository clone ${errorType.toLowerCase()}: ${errorMessage}`);
+          console.warn('Continuing scan with URL only (no code analysis)');
+          // Don't fail the workflow - continue without cloned repo
+        } else {
+          // Re-throw critical errors (auth failures, validation errors)
+          throw error;
+        }
       }
 
       await a.logPhaseTransition(activityInput, 'repository-clone', 'complete');
