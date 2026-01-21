@@ -33,7 +33,15 @@
       "Bash(npx --prefix ghostshell prisma generate:*)",
       "Bash(npm run dev:*)",
       "Bash(docker compose:*)",
-      "Bash(PGPASSWORD=postgres psql:*)"
+      "Bash(PGPASSWORD=postgres psql:*)",
+      "Bash(pwsh:*)",
+      "Bash(git fetch:*)",
+      "Bash(ls:*)",
+      "Bash(.specify/scripts/bash/setup-plan.sh:*)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh:*)",
+      "Skill(speckit.tasks)",
+      "Skill(speckit.tasks:*)",
+      "Bash(./.specify/scripts/bash/check-prerequisites.sh:*)"
     ],
     "deny": [],
     "ask": []
